@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Anime Hub</title>
+    <style>
+        body { margin: 0; padding: 0; background: #090d16; font-family: 'Segoe UI', sans-serif; color: #fff; }
+        .anime-wrapper { max-width: 800px; margin: 20px auto; background: #0f172a; padding: 20px; border-radius: 12px; }
+        h2 { text-align: center; color: #38bdf8; text-transform: uppercase; }
+        .admin-btn { background: #38bdf8; color: #0f172a; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: block; margin: 0 auto 20px; }
+        .logout-btn { background: #ef4444; color: #fff; padding: 8px 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; float: right; margin-bottom: 10px; }
+        .admin-panel, .modal { background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; }
+        .admin-panel { display: none; }
+        
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: #1e293b; padding: 20px; border-radius: 10px; width: 90%; max-width: 500px; border: 1px solid #38bdf8; max-height: 90vh; overflow-y: auto; }
+        
+        input, select { width: 100%; padding: 10px; margin-bottom: 10px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 4px; box-sizing: border-box; }
+        input[type="file"] { padding: 7px; cursor: pointer; background: #0f172a; }
+        .action-btn { width: 100%; padding: 10px; background: #38bdf8; color: #0f172a; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 5px; }
+        .close-btn { background: #64748b; color: white; margin-top: 5px; }
+        
+        .filter-toolbar { background: rgba(30, 41, 59, 0.7); border: 1px solid #334155; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; }
+        .filter-group { display: flex; flex-direction: column; gap: 4px; min-width: 160px; flex: 1; }
+        .filter-group label { font-size: 0.75em; color: #38bdf8; font-weight: 600; }
+        
+        .anime-card { background: #1e293b; border-radius: 8px; overflow: hidden; margin-bottom: 15px; border: 1px solid #334155; position: relative; }
+        .card-menu-container { position: absolute; top: 10px; right: 10px; z-index: 10; display: none; }
+        .dots-btn { background: rgba(15, 23, 42, 0.85); color: #fff; border: 1px solid #334155; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 1rem; font-weight: bold; }
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 35px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); width: 170px; overflow: hidden; }
+        .dropdown-menu button { width: 100%; background: none; border: none; color: #fff; padding: 8px 12px; text-align: left; cursor: pointer; font-size: 0.85rem; border-bottom: 1px solid #1e293b; }
+        .dropdown-menu button:hover { background: #38bdf8; color: #0f172a; }
+
+        .anime-poster { width: 100%; height: auto; display: block; max-height: 400px; object-fit: cover; }
+        .anime-info { padding: 15px; text-align: left; }
+        .anime-title { color: #fff; font-size: 1.2rem; margin: 0 0 10px 0; }
+        .anime-meta { color: #94a3b8; font-size: 0.85rem; margin-bottom: 10px; line-height: 1.5; }
+        .btn-container { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+        .link-btn { flex: 1; min-width: 80px; display: block; padding: 8px; text-align: center; color: #0f172a; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 0.85rem; }
+        .filepress { background: #38bdf8; }
+        .appdrive { background: #22c55e; }
+        .hubcloud { background: #a855f7; color: #fff; }
+        .customlink { background: #f97316; color: #fff; }
+        .ongoing-btn { background: #f59e0b; display: block; padding: 10px; text-align: center; color: #000; text-decoration: none; border-radius: 6px; font-weight: bold; }
+        .season-badge { background: #38bdf8; color: #0f172a; font-size: 0.75rem; font-weight: bold; padding: 2px 8px; border-radius: 4px; margin-left: 8px; display: inline-block; vertical-align: middle; }
+    </style>
+</head>
+<body>
+
+<div class="anime-wrapper">
+    <button id="mainAdminBtn" class="admin-btn" onclick="checkAdmin()">Admin Login</button>
+
+    <div id="adminPanel" class="admin-panel">
+        <button class="logout-btn" onclick="logoutAdmin()">Logout</button>
+        <h3 style="margin-top:0;" id="panelTitle">Add New Anime Card</h3>
+        <select id="inputCategory" onchange="updateFormFields()">
+            <option value="download">For Download</option>
+            <option value="downloaded">Downloaded (USB)</option>
+            <option value="ongoing">Ongoing</option>
+            <option value="watching">Currently Watching</option>
+            <option value="completed">Watched List</option>
+        </select>
+        
+        <input type="text" id="inputTitle" placeholder="Anime Title">
+        <input type="text" id="inputSeason" placeholder="Season (e.g., Season 1, Season 2)">
+        
+        <label style="font-size: 0.8rem; color: #38bdf8; display: block; margin-bottom: 5px;">Select Poster Image:</label>
+        <input type="file" id="inputPosterFile" accept="image/*">
+
+        <div id="dynamicFields"></div>
+        <button id="saveCardBtn" class="action-btn" onclick="addAnimeCard()">Add Anime Card to List</button>
+    </div>
+
+    <h2>⚡ Premium Anime Hub ⚡</h2>
+
+    <div class="filter-toolbar">
+        <div class="filter-group">
+            <label>SEARCH ANIME:</label>
+            <input type="text" id="searchBox" placeholder="Search by name..." oninput="filterAndSort()">
+        </div>
+        <div class="filter-group">
+            <label>CATEGORY:</label>
+            <select id="filterCategory" onchange="filterAndSort()">
+                <option value="all">All Categories</option>
+                <option value="download">For Download</option>
+                <option value="downloaded">Downloaded (USB)</option>
+                <option value="ongoing">Ongoing</option>
+                <option value="watching">Currently Watching</option>
+                <option value="completed">Watched List</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>SORT BY:</label>
+            <select id="sortOption" onchange="filterAndSort()">
+                <option value="none">Default / None</option>
+                <option value="high-low">High to Low (Largest First)</option>
+                <option value="low-high">Low to High (Smallest First)</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="animeContainer"></div>
+</div>
+
+<div id="moveModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 style="color: #38bdf8; margin-top:0;">Move Anime to Section</h3>
+        <label style="font-size: 0.8rem; color: #38bdf8;">Select New Category:</label>
+        <select id="moveCategorySelect" onchange="updateMoveFields()">
+            <option value="download">For Download</option>
+            <option value="downloaded">Downloaded (USB)</option>
+            <option value="ongoing">Ongoing</option>
+            <option value="watching">Currently Watching</option>
+            <option value="completed">Watched List</option>
+        </select>
+        
+        <div id="moveDynamicFields"></div>
+        
+        <button class="action-btn" onclick="submitMoveCard()">Confirm Move & Save</button>
+        <button class="action-btn close-btn" onclick="closeMoveModal()">Cancel</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAVc_Yx0wBeCrGVqLWNdaQpETj98kovlaQ",
+      authDomain: "anime-watch-list-ba101.firebaseapp.com",
+      projectId: "anime-watch-list-ba101",
+      storageBucket: "anime-watch-list-ba101.firebasestorage.app",
+      messagingSenderId: "634921952099",
+      appId: "1:634921952099:web:018eeb25fa36d05354a956",
+      measurementId: "G-40CJQJF1YJ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const correctUser = "admin123";
+    const correctPass = "anime@2026";
+    
+    let animeData = [];
+    let editingId = null;
+    let movingIndex = null;
+
+    window.onload = async function() {
+        if (sessionStorage.getItem("isAdminLoggedIn") === "true") {
+            document.getElementById('adminPanel').style.display = 'block';
+            document.getElementById('mainAdminBtn').style.display = 'none';
+        }
+        updateFormFields();
+        await fetchAnimeFromFirebase();
+    };
+
+    async function fetchAnimeFromFirebase() {
+        try {
+            const querySnapshot = await getDocs(collection(db, "animes"));
+            animeData = [];
+            querySnapshot.forEach((docSnap) => {
+                let item = docSnap.data();
+                item.id = docSnap.id;
+                animeData.push(item);
+            });
+            filterAndSort();
+        } catch (error) {
+            console.error("Error fetching data: ", error);
+            alert("Database Connection Error! Please check Firebase Security Rules.");
+        }
+    }
+
+    window.checkAdmin = function() {
+        let user = prompt("Enter Username:");
+        let pass = prompt("Enter Password:");
+
+        if (user === correctUser && pass === correctPass) {
+            sessionStorage.setItem("isAdminLoggedIn", "true");
+            document.getElementById('adminPanel').style.display = 'block';
+            document.getElementById('mainAdminBtn').style.display = 'none';
+            alert("Login Successful!");
+            filterAndSort();
+        } else {
+            alert("Invalid Credentials!");
+        }
+    }
+
+    window.logoutAdmin = function() {
+        sessionStorage.removeItem("isAdminLoggedIn");
+        document.getElementById('adminPanel').style.display = 'none';
+        document.getElementById('mainAdminBtn').style.display = 'block';
+        resetForm();
+        filterAndSort();
+    }
+
+    window.updateFormFields = function() {
+        const cat = document.getElementById('inputCategory').value;
+        const container = document.getElementById('dynamicFields');
+        container.innerHTML = getFieldsHTML(cat);
+    }
+
+    function getFieldsHTML(cat, prefix = "input") {
+        if (cat === 'download') {
+            return `
+                <input type="text" id="${prefix}Episodes" placeholder="Total Episodes (e.g. 12)">
+                <input type="text" id="${prefix}Quality" placeholder="Quality (e.g. 720p HEVC)">
+                <input type="text" id="${prefix}Size" placeholder="File Size (e.g. 1.04GB)">
+                <input type="text" id="${prefix}Filepress" placeholder="FilePress Link (Optional)">
+                <input type="text" id="${prefix}Appdrive" placeholder="AppDrive Link (Optional)">
+                <input type="text" id="${prefix}Hubcloud" placeholder="HubCloud Link (Optional)">
+                <input type="text" id="${prefix}Link" placeholder="Other Link (Optional)">
+            `;
+        } else if (cat === 'downloaded') {
+            return `
+                <select id="${prefix}UsbDrive">
+                    <option value="Flash 32GB USB">Flash 32GB USB</option>
+                    <option value="SanDisk 32GB USB">SanDisk 32GB USB</option>
+                    <option value="SanDisk 8GB USB">SanDisk 8GB USB</option>
+                </select>
+                <input type="text" id="${prefix}Episodes" placeholder="Total Episodes (e.g. 12)">
+                <input type="text" id="${prefix}Quality" placeholder="Quality (e.g. 1080p)">
+                <input type="text" id="${prefix}Size" placeholder="File Size (e.g. 2.1GB)">
+            `;
+        } else if (cat === 'ongoing') {
+            return `
+                <input type="text" id="${prefix}Episodes" placeholder="Ongoing Status (e.g. Ep 5 / Ongoing)">
+                <input type="text" id="${prefix}Link" placeholder="Ongoing Page Link">
+            `;
+        } else if (cat === 'watching') {
+            return `
+                <input type="number" id="${prefix}TotalEp" placeholder="Total Episodes">
+                <input type="number" id="${prefix}WatchedEp" placeholder="Watched Episodes">
+                <input type="text" id="${prefix}LastWatched" placeholder="Last Watched Details (e.g. Yesterday)">
+            `;
+        } else if (cat === 'completed') {
+            return `
+                <input type="number" id="${prefix}TotalEp" placeholder="Total Episodes">
+                <input type="text" id="${prefix}Rating" placeholder="Your Rating (e.g. 9/10)">
+                <input type="text" id="${prefix}WatchYear" placeholder="Year Watched (e.g. 2026)">
+            `;
+        }
+    }
+
+    function compressImage(file, callback) {
+        let reader = new FileReader();
+        reader.onload = function(e) {
+            let img = new Image();
+            img.onload = function() {
+                let canvas = document.createElement('canvas');
+                let ctx = canvas.getContext('2d');
+                let maxWidth = 400;
+                let scale = maxWidth / img.width;
+                canvas.width = maxWidth;
+                canvas.height = img.height * scale;
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                callback(canvas.toDataURL('image/jpeg', 0.7));
+            }
+            img.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+    }
+
+    window.addAnimeCard = function() {
+        const category = document.getElementById('inputCategory').value;
+        const title = document.getElementById('inputTitle').value;
+        const season = document.getElementById('inputSeason').value;
+        const fileInput = document.getElementById('inputPosterFile');
+
+        if (!title) { alert('Please enter title'); return; }
+
+        if (editingId !== null && (!fileInput.files || !fileInput.files[0])) {
+            let existingItem = animeData.find(item => item.id === editingId);
+            processCardCreation(category, title, season, existingItem.poster);
+            return;
+        }
+
+        if (!fileInput.files || !fileInput.files[0]) {
+            alert('Please select a poster image.');
+            return;
+        }
+
+        compressImage(fileInput.files[0], function(compressedBase64) {
+            processCardCreation(category, title, season, compressedBase64);
+        });
+    }
+
+    async function processCardCreation(category, title, season, poster) {
+        let newCard = { category, title, season: season || '', poster };
+        fillCardDataFromForm(newCard, category, "input");
+
+        try {
+            if (editingId !== null) {
+                await updateDoc(doc(db, "animes", editingId), newCard);
+                alert('Anime updated successfully!');
+                resetForm();
+            } else {
+                await addDoc(collection(db, "animes"), newCard);
+                alert('Anime added successfully!');
+                document.getElementById('inputTitle').value = '';
+                document.getElementById('inputSeason').value = '';
+                document.getElementById('inputPosterFile').value = '';
+            }
+            await fetchAnimeFromFirebase();
+        } catch (error) {
+            console.error("Firebase Error: ", error);
+            alert("Error saving data to Cloud. Please check Firebase Rules.");
+        }
+    }
+
+    function fillCardDataFromForm(cardObj, category, prefix) {
+        if (category === 'download') {
+            cardObj.episodes = document.getElementById(prefix + 'Episodes').value;
+            cardObj.quality = document.getElementById(prefix + 'Quality').value;
+            cardObj.size = document.getElementById(prefix + 'Size').value;
+            cardObj.filepress = document.getElementById(prefix + 'Filepress').value;
+            cardObj.appdrive = document.getElementById(prefix + 'Appdrive').value;
+            cardObj.hubcloud = document.getElementById(prefix + 'Hubcloud').value;
+            cardObj.link = document.getElementById(prefix + 'Link').value;
+        } else if (category === 'downloaded') {
+            cardObj.usbDrive = document.getElementById(prefix + 'UsbDrive').value;
+            cardObj.episodes = document.getElementById(prefix + 'Episodes').value;
+            cardObj.quality = document.getElementById(prefix + 'Quality').value;
+            cardObj.size = document.getElementById(prefix + 'Size').value;
+        } else if (category === 'ongoing') {
+            cardObj.episodes = document.getElementById(prefix + 'Episodes').value;
+            cardObj.link = document.getElementById(prefix + 'Link').value;
+        } else if (category === 'watching') {
+            cardObj.totalEp = parseInt(document.getElementById(prefix + 'TotalEp').value) || 0;
+            cardObj.watchedEp = parseInt(document.getElementById(prefix + 'WatchedEp').value) || 0;
+            cardObj.pendingEp = cardObj.totalEp - cardObj.watchedEp;
+            cardObj.lastWatched = document.getElementById(prefix + 'LastWatched').value;
+        } else if (category === 'completed') {
+            cardObj.totalEp = parseInt(document.getElementById(prefix + 'TotalEp').value) || 0;
+            cardObj.rating = document.getElementById(prefix + 'Rating').value;
+            cardObj.watchYear = document.getElementById(prefix + 'WatchYear').value;
+        }
+    }
+
+    function resetForm() {
+        editingId = null;
+        document.getElementById('panelTitle').innerText = "Add New Anime Card";
+        document.getElementById('saveCardBtn').innerText = "Add Anime Card to List";
+        document.getElementById('inputTitle').value = '';
+        document.getElementById('inputSeason').value = '';
+        document.getElementById('inputPosterFile').value = '';
+        document.getElementById('inputCategory').value = 'download';
+        updateFormFields();
+    }
+
+    window.toggleCardMenu = function(index, event) {
+        event.stopPropagation();
+        let allMenus = document.querySelectorAll('.dropdown-menu');
+        allMenus.forEach((menu, i) => { if (i !== index) menu.style.display = 'none'; });
+        let menu = document.getElementById('menu-' + index);
+        menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+    }
+
+    window.onclick = function() {
+        let allMenus = document.querySelectorAll('.dropdown-menu');
+        allMenus.forEach(menu => menu.style.display = 'none');
+    };
+
+    window.openMoveModal = function(index) {
+        movingIndex = index;
+        let item = animeData[index];
+        document.getElementById('moveCategorySelect').value = item.category === 'ongoing' ? 'download' : (item.category === 'download' ? 'downloaded' : (item.category === 'downloaded' ? 'watching' : 'completed'));
+        updateMoveFields();
+        document.getElementById('moveModal').style.display = 'flex';
+    }
+
+    window.closeMoveModal = function() {
+        document.getElementById('moveModal').style.display = 'none';
+        movingIndex = null;
+    }
+
+    window.updateMoveFields = function() {
+        const targetCat = document.getElementById('moveCategorySelect').value;
+        const container = document.getElementById('moveDynamicFields');
+        container.innerHTML = getFieldsHTML(targetCat, "moveInput");
+        
+        if (movingIndex !== null) {
+            let item = animeData[movingIndex];
+            setTimeout(() => {
+                if (document.getElementById('moveInputEpisodes')) document.getElementById('moveInputEpisodes').value = item.episodes || '';
+                if (document.getElementById('moveInputTotalEp')) document.getElementById('moveInputTotalEp').value = item.totalEp || item.episodes || '';
+                if (document.getElementById('moveInputQuality')) document.getElementById('moveInputQuality').value = item.quality || '';
+                if (document.getElementById('moveInputSize')) document.getElementById('moveInputSize').value = item.size || '';
+                if (document.getElementById('moveInputLink')) document.getElementById('moveInputLink').value = item.link || '';
+            }, 50);
+        }
+    }
+
+    window.submitMoveCard = async function() {
+        if (movingIndex === null) return;
+        let item = animeData[movingIndex];
+        let newCategory = document.getElementById('moveCategorySelect').value;
+        
+        let updatedCard = {
+            title: item.title,
+            season: item.season || '',
+            poster: item.poster,
+            category: newCategory
+        };
+
+        fillCardDataFromForm(updatedCard, newCategory, "moveInput");
+
+        try {
+            await updateDoc(doc(db, "animes", item.id), updatedCard);
+            alert(`Moved to ${newCategory} successfully!`);
+            closeMoveModal();
+            await fetchAnimeFromFirebase();
+        } catch (error) {
+            console.error("Move error:", error);
+            alert("Error moving card!");
+        }
+    }
+
+    window.editCard = function(index) {
+        let item = animeData[index];
+        editingId = item.id;
+        document.getElementById('panelTitle').innerText = "Edit Anime Card";
+        document.getElementById('saveCardBtn').innerText = "Update Anime Card";
+        document.getElementById('inputCategory').value = item.category;
+        updateFormFields();
+        document.getElementById('inputTitle').value = item.title;
+        document.getElementById('inputSeason').value = item.season || '';
+
+        setTimeout(() => {
+            if (item.category === 'download') {
+                document.getElementById('inputEpisodes').value = item.episodes || '';
+                document.getElementById('inputQuality').value = item.quality || '';
+                document.getElementById('inputSize').value = item.size || '';
+                document.getElementById('inputFilepress').value = item.filepress || '';
+                document.getElementById('inputAppdrive').value = item.appdrive || '';
+                document.getElementById('inputHubcloud').value = item.hubcloud || '';
+                document.getElementById('inputLink').value = item.link || '';
+            } else if (item.category === 'downloaded') {
+                document.getElementById('inputUsbDrive').value = item.usbDrive || 'Flash 32GB USB';
+                document.getElementById('inputEpisodes').value = item.episodes || '';
+                document.getElementById('inputQuality').value = item.quality || '';
+                document.getElementById('inputSize').value = item.size || '';
+            } else if (item.category === 'ongoing') {
+                document.getElementById('inputEpisodes').value = item.episodes || '';
+                document.getElementById('inputLink').value = item.link || '';
+            } else if (item.category === 'watching') {
+                document.getElementById('inputTotalEp').value = item.totalEp || '';
+                document.getElementById('inputWatchedEp').value = item.watchedEp || '';
+                document.getElementById('inputLastWatched').value = item.lastWatched || '';
+            } else if (item.category === 'completed') {
+                document.getElementById('inputTotalEp').value = item.totalEp || '';
+                document.getElementById('inputRating').value = item.rating || '';
+                document.getElementById('inputWatchYear').value = item.watchYear || '';
+            }
+        }, 50);
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.deleteCard = async function(index) {
+        if (confirm("Delete this anime?")) {
+            try {
+                await deleteDoc(doc(db, "animes", animeData[index].id));
+                await fetchAnimeFromFirebase();
+            } catch (error) { console.error(error); }
+        }
+    }
+
+    window.cloneCard = async function(index) {
+        let clonedItem = JSON.parse(JSON.stringify(animeData[index]));
+        delete clonedItem.id;
+        clonedItem.title += " (Copy)";
+        await addDoc(collection(db, "animes"), clonedItem);
+        await fetchAnimeFromFirebase();
+    }
+
+    window.shareCard = function(index) {
+        let item = animeData[index];
+        let shareText = `Check out ${item.title} ${item.season ? '(' + item.season + ')' : ''}!`;
+        if (navigator.share) { navigator.share({ title: item.title, text: shareText }); } 
+        else { prompt("Copy details:", shareText); }
+    }
+
+    function renderCards(data) {
+        const container = document.getElementById('animeContainer');
+        container.innerHTML = '';
+
+        if (data.length === 0) {
+            container.innerHTML = '<p style="color: #94a3b8; text-align: center;">No anime found.</p>';
+            return;
+        }
+
+        let isAdmin = sessionStorage.getItem("isAdminLoggedIn") === "true";
+
+        data.forEach((item) => {
+            let originalIndex = animeData.indexOf(item);
+            let seasonDisplay = item.season ? `<span class="season-badge">${item.season}</span>` : '';
+
+            let cardHTML = `<div class="anime-card">`;
+
+            if (isAdmin) {
+                cardHTML += `
+                    <div class="card-menu-container" style="display: block;">
+                        <button class="dots-btn" onclick="toggleCardMenu(${originalIndex}, event)">⋮</button>
+                        <div id="menu-${originalIndex}" class="dropdown-menu">
+                            <button onclick="openMoveModal(${originalIndex})" style="color: #38bdf8; font-weight: bold;">🔁 Move To...</button>
+                            <button onclick="editCard(${originalIndex})">✏️ Edit</button>
+                            <button onclick="deleteCard(${originalIndex})">🗑️ Delete</button>
+                            <button onclick="cloneCard(${originalIndex})">📑 Clone</button>
+                            <button onclick="shareCard(${originalIndex})">🔗 Share</button>
+                        </div>
+                    </div>`;
+            }
+
+            cardHTML += `
+                    <img src="${item.poster}" class="anime-poster" alt="Poster">
+                    <div class="anime-info">
+                        <h3 class="anime-title">${item.title} ${seasonDisplay}</h3>
+            `;
+
+            if (item.category === 'download') {
+                cardHTML += `<div class="anime-meta">Episodes: ${item.episodes || 'N/A'} | Quality: ${item.quality || 'N/A'} | Size: ${item.size || 'N/A'}</div>`;
+                cardHTML += `<div class="btn-container">`;
+                if (item.filepress) cardHTML += `<a href="${item.filepress}" class="link-btn filepress" target="_blank">FilePress</a>`;
+                if (item.appdrive) cardHTML += `<a href="${item.appdrive}" class="link-btn appdrive" target="_blank">AppDrive</a>`;
+                if (item.hubcloud) cardHTML += `<a href="${item.hubcloud}" class="link-btn hubcloud" target="_blank">HubCloud</a>`;
+                if (item.link) cardHTML += `<a href="${item.link}" class="link-btn customlink" target="_blank">Link</a>`;
+                cardHTML += `</div>`;
+            } else if (item.category === 'downloaded') {
+                cardHTML += `
+                    <div class="anime-meta" style="color: #22c55e; font-weight: bold;">💾 Saved on: ${item.usbDrive}</div>
+                    <div class="anime-meta">Episodes: ${item.episodes || 'N/A'} | Quality: ${item.quality || 'N/A'} | Size: ${item.size || 'N/A'}</div>
+                `;
+            } else if (item.category === 'ongoing') {
+                cardHTML += `
+                    <div class="anime-meta">Status: ${item.episodes || 'Ongoing'}</div>
+                    <a href="${item.link || '#'}" class="ongoing-btn" target="_blank">Ongoing Page</a>
+                `;
+            } else if (item.category === 'watching') {
+                cardHTML += `
+                    <div class="anime-meta">
+                        Total Episodes: ${item.totalEp || 0}<br>
+                        Watched Episodes: ${item.watchedEp || 0}<br>
+                        Pending Episodes: ${item.pendingEp || 0}<br>
+                        Last Watched: ${item.lastWatched || 'N/A'}
+                    </div>
+                `;
+            } else if (item.category === 'completed') {
+                cardHTML += `
+                    <div class="anime-meta">
+                        Total Episodes: ${item.totalEp || 0}<br>
+                        Rating: ${item.rating || 'N/A'}<br>
+                        Year Watched: ${item.watchYear || 'N/A'}
+                    </div>
+                `;
+            }
+
+            cardHTML += `</div></div>`;
+            container.innerHTML += cardHTML;
+        });
+    }
+
+    window.filterAndSort = function() {
+        let query = document.getElementById('searchBox').value.toLowerCase();
+        let selectedCategory = document.getElementById('filterCategory').value;
+        let sortOption = document.getElementById('sortOption').value;
+
+        let filtered = animeData.filter(item => {
+            let matchesSearch = item.title.toLowerCase().includes(query) || (item.season && item.season.toLowerCase().includes(query));
+            let matchesCat = (selectedCategory === 'all' || item.category === selectedCategory);
+            return matchesSearch && matchesCat;
+        });
+
+        if (sortOption === 'high-low') {
+            filtered.sort((a, b) => (b.totalEp || parseInt(b.episodes) || 0) - (a.totalEp || parseInt(a.episodes) || 0));
+        } else if (sortOption === 'low-high') {
+            filtered.sort((a, b) => (a.totalEp || parseInt(a.episodes) || 0) - (b.totalEp || parseInt(b.episodes) || 0));
+        }
+
+        renderCards(filtered);
+    }
+</script>
+
+</body>
+</html>
