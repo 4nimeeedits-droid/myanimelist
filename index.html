@@ -8,7 +8,6 @@
         body { margin: 0; padding: 0; background: #0b0e14; font-family: 'Segoe UI', sans-serif; color: #fff; }
         .anime-wrapper { max-width: 1200px; margin: 0 auto; padding: 20px; }
         
-        /* Admin Header */
         .admin-btn { background: #38bdf8; color: #0f172a; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: block; margin: 0 auto 20px; }
         .logout-btn { background: #ef4444; color: #fff; padding: 8px 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; float: right; margin-bottom: 10px; }
         .admin-panel, .modal { background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; }
@@ -22,23 +21,27 @@
         .action-btn { width: 100%; padding: 10px; background: #38bdf8; color: #0f172a; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 5px; }
         .close-btn { background: #64748b; color: white; margin-top: 5px; }
         
-        /* Filter Toolbar */
         .filter-toolbar { background: rgba(30, 41, 59, 0.7); border: 1px solid #334155; padding: 15px; border-radius: 8px; margin-bottom: 25px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; }
         .filter-group { display: flex; flex-direction: column; gap: 4px; min-width: 160px; flex: 1; }
         .filter-group label { font-size: 0.75em; color: #38bdf8; font-weight: 600; }
 
-        /* Crunchyroll Style Section Rows */
         .section-title { font-size: 1.4rem; color: #fff; font-weight: bold; margin: 25px 0 12px 0; display: flex; align-items: center; gap: 8px; border-left: 4px solid #f97316; padding-left: 10px; }
         
-        .anime-row { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 15px; scroll-behavior: smooth; }
+        .anime-row { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 15px; scroll-behavior: smooth; align-items: stretch; }
         .anime-row::-webkit-scrollbar { height: 8px; }
         .anime-row::-webkit-scrollbar-track { background: #0f172a; border-radius: 10px; }
         .anime-row::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
         .anime-row::-webkit-scrollbar-thumb:hover { background: #f97316; }
 
-        /* Poster Card Layout */
-        .anime-card { flex: 0 0 170px; background: #141b2d; border-radius: 8px; overflow: hidden; border: 1px solid #1e293b; position: relative; transition: transform 0.2s ease; display: flex; flex-direction: column; }
+        /* Dynamic Card Dimensions based on Orientation */
+        .anime-card { background: #141b2d; border-radius: 8px; overflow: hidden; border: 1px solid #1e293b; position: relative; transition: transform 0.2s ease; display: flex; flex-direction: column; flex-shrink: 0; }
         .anime-card:hover { transform: translateY(-4px); border-color: #f97316; }
+
+        .card-portrait { flex: 0 0 170px; width: 170px; }
+        .card-portrait .anime-poster { width: 100%; height: 240px; object-fit: contain; background: #000; display: block; }
+
+        .card-landscape { flex: 0 0 280px; width: 280px; }
+        .card-landscape .anime-poster { width: 100%; height: 160px; object-fit: contain; background: #000; display: block; }
         
         .card-menu-container { position: absolute; top: 6px; right: 6px; z-index: 10; display: none; }
         .dots-btn { background: rgba(0,0,0,0.75); color: #fff; border: 1px solid #334155; padding: 4px 10px; border-radius: 15px; cursor: pointer; font-size: 0.9rem; font-weight: bold; }
@@ -46,7 +49,6 @@
         .dropdown-menu button { width: 100%; background: none; border: none; color: #fff; padding: 8px 12px; text-align: left; cursor: pointer; font-size: 0.8rem; border-bottom: 1px solid #1e293b; }
         .dropdown-menu button:hover { background: #f97316; color: #fff; }
 
-        .anime-poster { width: 100%; height: 240px; object-fit: cover; display: block; }
         .anime-info { padding: 10px; display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1; }
         .anime-title { color: #fff; font-size: 0.9rem; font-weight: bold; margin: 0 0 6px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .anime-meta { color: #94a3b8; font-size: 0.75rem; margin-bottom: 8px; line-height: 1.4; }
@@ -78,6 +80,12 @@
         
         <input type="text" id="inputTitle" placeholder="Anime Title">
         <input type="number" id="inputSeason" placeholder="Season Number (e.g., 1, 2)">
+
+        <label style="font-size: 0.8rem; color: #38bdf8; display: block; margin-bottom: 5px;">Select Poster Orientation:</label>
+        <select id="inputOrientation">
+            <option value="portrait">Portrait (Vertical / Tall Poster)</option>
+            <option value="landscape">Landscape (Horizontal / Wide Banner)</option>
+        </select>
         
         <label style="font-size: 0.8rem; color: #38bdf8; display: block; margin-bottom: 5px;">Select Poster Image:</label>
         <input type="file" id="inputPosterFile" accept="image/*">
@@ -185,6 +193,7 @@
                 let item = docSnap.data();
                 item.id = docSnap.id;
                 if (item.order === undefined) item.order = Date.now();
+                if (!item.orientation) item.orientation = 'portrait';
                 animeData.push(item);
             });
             animeData.sort((a, b) => a.order - b.order);
@@ -285,12 +294,12 @@
             img.onload = function() {
                 let canvas = document.createElement('canvas');
                 let ctx = canvas.getContext('2d');
-                let maxWidth = 400;
+                let maxWidth = 600;
                 let scale = maxWidth / img.width;
                 canvas.width = maxWidth;
                 canvas.height = img.height * scale;
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                callback(canvas.toDataURL('image/jpeg', 0.7));
+                callback(canvas.toDataURL('image/jpeg', 0.8));
             }
             img.src = e.target.result;
         }
@@ -301,13 +310,14 @@
         const category = document.getElementById('inputCategory').value;
         const title = document.getElementById('inputTitle').value;
         const season = document.getElementById('inputSeason').value;
+        const orientation = document.getElementById('inputOrientation').value;
         const fileInput = document.getElementById('inputPosterFile');
 
         if (!title) { alert('Please enter title'); return; }
 
         if (editingId !== null && (!fileInput.files || !fileInput.files[0])) {
             let existingItem = animeData.find(item => item.id === editingId);
-            processCardCreation(category, title, season, existingItem.poster, existingItem.order);
+            processCardCreation(category, title, season, orientation, existingItem.poster, existingItem.order);
             return;
         }
 
@@ -317,12 +327,12 @@
         }
 
         compressImage(fileInput.files[0], function(compressedBase64) {
-            processCardCreation(category, title, season, compressedBase64, Date.now());
+            processCardCreation(category, title, season, orientation, compressedBase64, Date.now());
         });
     }
 
-    async function processCardCreation(category, title, season, poster, orderVal) {
-        let newCard = { category, title, season: season || '', poster, order: orderVal !== undefined ? orderVal : Date.now() };
+    async function processCardCreation(category, title, season, orientation, poster, orderVal) {
+        let newCard = { category, title, season: season || '', orientation, poster, order: orderVal !== undefined ? orderVal : Date.now() };
         fillCardDataFromForm(newCard, category, "input");
 
         try {
@@ -379,6 +389,7 @@
         document.getElementById('saveCardBtn').innerText = "Add Anime Card to List";
         document.getElementById('inputTitle').value = '';
         document.getElementById('inputSeason').value = '';
+        document.getElementById('inputOrientation').value = 'portrait';
         document.getElementById('inputPosterFile').value = '';
         document.getElementById('inputCategory').value = 'download';
         updateFormFields();
@@ -456,6 +467,7 @@
         let updatedCard = {
             title: item.title,
             season: item.season || '',
+            orientation: item.orientation || 'portrait',
             poster: item.poster,
             category: newCategory,
             order: item.order || Date.now()
@@ -483,6 +495,7 @@
         updateFormFields();
         document.getElementById('inputTitle').value = item.title;
         document.getElementById('inputSeason').value = item.season ? item.season.toString().replace(/\D/g, '') : '';
+        document.getElementById('inputOrientation').value = item.orientation || 'portrait';
 
         setTimeout(() => {
             if (item.category === 'download') {
@@ -552,7 +565,6 @@
         let isAdmin = sessionStorage.getItem("isAdminLoggedIn") === "true";
         let selectedCategory = document.getElementById('filterCategory').value;
 
-        // Group anime by category
         let categoriesToRender = selectedCategory === 'all' 
             ? ['download', 'downloaded', 'ongoing', 'watching', 'completed'] 
             : [selectedCategory];
@@ -570,8 +582,9 @@
                     let originalIndex = animeData.indexOf(item);
                     let seasonStr = item.season ? `${formatSeasonText(item.season)} | ` : '';
                     let epStr = formatEpText(item.episodes || item.totalEp);
+                    let orientationClass = item.orientation === 'landscape' ? 'card-landscape' : 'card-portrait';
 
-                    let cardHTML = `<div class="anime-card">`;
+                    let cardHTML = `<div class="anime-card ${orientationClass}">`;
 
                     if (isAdmin) {
                         cardHTML += `
