@@ -43,7 +43,6 @@
         .hubcloud { background: #a855f7; color: #fff; }
         .customlink { background: #f97316; color: #fff; }
         .ongoing-btn { background: #f59e0b; display: block; padding: 10px; text-align: center; color: #000; text-decoration: none; border-radius: 6px; font-weight: bold; }
-        .season-badge { background: #38bdf8; color: #0f172a; font-size: 0.75rem; font-weight: bold; padding: 2px 8px; border-radius: 4px; margin-left: 8px; display: inline-block; vertical-align: middle; }
     </style>
 </head>
 <body>
@@ -63,7 +62,7 @@
         </select>
         
         <input type="text" id="inputTitle" placeholder="Anime Title">
-        <input type="text" id="inputSeason" placeholder="Season (e.g., Season 1, Season 2)">
+        <input type="number" id="inputSeason" placeholder="Season Number (e.g., 1, 2)">
         
         <label style="font-size: 0.8rem; color: #38bdf8; display: block; margin-bottom: 5px;">Select Poster Image:</label>
         <input type="file" id="inputPosterFile" accept="image/*">
@@ -203,7 +202,7 @@
     function getFieldsHTML(cat, prefix = "input") {
         if (cat === 'download') {
             return `
-                <input type="text" id="${prefix}Episodes" placeholder="Total Episodes (e.g. 12)">
+                <input type="number" id="${prefix}Episodes" placeholder="Total Episodes (e.g. 12)">
                 <input type="text" id="${prefix}Quality" placeholder="Quality (e.g. 720p HEVC)">
                 <input type="text" id="${prefix}Size" placeholder="File Size (e.g. 1.04GB)">
                 <input type="text" id="${prefix}Filepress" placeholder="FilePress Link (Optional)">
@@ -218,20 +217,20 @@
                     <option value="SanDisk 32GB USB">SanDisk 32GB USB</option>
                     <option value="SanDisk 8GB USB">SanDisk 8GB USB</option>
                 </select>
-                <input type="text" id="${prefix}Episodes" placeholder="Total Episodes (e.g. 12)">
+                <input type="number" id="${prefix}Episodes" placeholder="Total Episodes (e.g. 12)">
                 <input type="text" id="${prefix}Quality" placeholder="Quality (e.g. 1080p)">
                 <input type="text" id="${prefix}Size" placeholder="File Size (e.g. 2.1GB)">
             `;
         } else if (cat === 'ongoing') {
             return `
-                <input type="text" id="${prefix}Episodes" placeholder="Ongoing Status (e.g. Ep 5 / Ongoing)">
+                <input type="text" id="${prefix}Episodes" placeholder="Ongoing Episode (e.g. 5)">
                 <input type="text" id="${prefix}Link" placeholder="Ongoing Page Link">
             `;
         } else if (cat === 'watching') {
             return `
                 <input type="number" id="${prefix}TotalEp" placeholder="Total Episodes">
                 <input type="number" id="${prefix}WatchedEp" placeholder="Watched Episodes">
-                <input type="text" id="${prefix}LastWatched" placeholder="Last Watched Details (e.g. Yesterday)">
+                <input type="text" id="${prefix}LastWatched" placeholder="Last Watched Details (e.g. Ep 4)">
             `;
         } else if (cat === 'completed') {
             return `
@@ -240,6 +239,18 @@
                 <input type="text" id="${prefix}WatchYear" placeholder="Year Watched (e.g. 2026)">
             `;
         }
+    }
+
+    function formatSeasonText(val) {
+        if (!val) return '';
+        let str = val.toString().trim();
+        return str.toLowerCase().startsWith('season') ? str : `Season ${str}`;
+    }
+
+    function formatEpText(val) {
+        if (!val) return 'N/A';
+        let str = val.toString().trim();
+        return str.toLowerCase().startsWith('ep') ? str : `EP ${str}`;
     }
 
     function compressImage(file, callback) {
@@ -424,11 +435,11 @@
         document.getElementById('inputCategory').value = item.category;
         updateFormFields();
         document.getElementById('inputTitle').value = item.title;
-        document.getElementById('inputSeason').value = item.season || '';
+        document.getElementById('inputSeason').value = item.season ? item.season.toString().replace(/\D/g, '') : '';
 
         setTimeout(() => {
             if (item.category === 'download') {
-                document.getElementById('inputEpisodes').value = item.episodes || '';
+                document.getElementById('inputEpisodes').value = item.episodes ? item.episodes.toString().replace(/\D/g, '') : '';
                 document.getElementById('inputQuality').value = item.quality || '';
                 document.getElementById('inputSize').value = item.size || '';
                 document.getElementById('inputFilepress').value = item.filepress || '';
@@ -437,7 +448,7 @@
                 document.getElementById('inputLink').value = item.link || '';
             } else if (item.category === 'downloaded') {
                 document.getElementById('inputUsbDrive').value = item.usbDrive || 'Flash 32GB USB';
-                document.getElementById('inputEpisodes').value = item.episodes || '';
+                document.getElementById('inputEpisodes').value = item.episodes ? item.episodes.toString().replace(/\D/g, '') : '';
                 document.getElementById('inputQuality').value = item.quality || '';
                 document.getElementById('inputSize').value = item.size || '';
             } else if (item.category === 'ongoing') {
@@ -476,7 +487,7 @@
 
     window.shareCard = function(index) {
         let item = animeData[index];
-        let shareText = `Check out ${item.title} ${item.season ? '(' + item.season + ')' : ''}!`;
+        let shareText = `Check out ${item.title} ${item.season ? '(' + formatSeasonText(item.season) + ')' : ''}!`;
         if (navigator.share) { navigator.share({ title: item.title, text: shareText }); } 
         else { prompt("Copy details:", shareText); }
     }
@@ -494,7 +505,6 @@
 
         data.forEach((item) => {
             let originalIndex = animeData.indexOf(item);
-            let seasonDisplay = item.season ? `<span class="season-badge">${item.season}</span>` : '';
 
             let cardHTML = `<div class="anime-card">`;
 
@@ -512,14 +522,17 @@
                     </div>`;
             }
 
+            let seasonStr = item.season ? `${formatSeasonText(item.season)} | ` : '';
+            let epStr = formatEpText(item.episodes || item.totalEp);
+
             cardHTML += `
                     <img src="${item.poster}" class="anime-poster" alt="Poster">
                     <div class="anime-info">
-                        <h3 class="anime-title">${item.title} ${seasonDisplay}</h3>
+                        <h3 class="anime-title">${item.title}</h3>
             `;
 
             if (item.category === 'download') {
-                cardHTML += `<div class="anime-meta">Episodes: ${item.episodes || 'N/A'} | Quality: ${item.quality || 'N/A'} | Size: ${item.size || 'N/A'}</div>`;
+                cardHTML += `<div class="anime-meta">${seasonStr}${epStr} | Quality: ${item.quality || 'N/A'} | Size: ${item.size || 'N/A'}</div>`;
                 cardHTML += `<div class="btn-container">`;
                 if (item.filepress) cardHTML += `<a href="${item.filepress}" class="link-btn filepress" target="_blank">FilePress</a>`;
                 if (item.appdrive) cardHTML += `<a href="${item.appdrive}" class="link-btn appdrive" target="_blank">AppDrive</a>`;
@@ -529,17 +542,17 @@
             } else if (item.category === 'downloaded') {
                 cardHTML += `
                     <div class="anime-meta" style="color: #22c55e; font-weight: bold;">💾 Saved on: ${item.usbDrive}</div>
-                    <div class="anime-meta">Episodes: ${item.episodes || 'N/A'} | Quality: ${item.quality || 'N/A'} | Size: ${item.size || 'N/A'}</div>
+                    <div class="anime-meta">${seasonStr}${epStr} | Quality: ${item.quality || 'N/A'} | Size: ${item.size || 'N/A'}</div>
                 `;
             } else if (item.category === 'ongoing') {
                 cardHTML += `
-                    <div class="anime-meta">Status: ${item.episodes || 'Ongoing'}</div>
+                    <div class="anime-meta">${seasonStr}Status: ${item.episodes ? formatEpText(item.episodes) : 'Ongoing'}</div>
                     <a href="${item.link || '#'}" class="ongoing-btn" target="_blank">Ongoing Page</a>
                 `;
             } else if (item.category === 'watching') {
                 cardHTML += `
                     <div class="anime-meta">
-                        Total Episodes: ${item.totalEp || 0}<br>
+                        ${seasonStr}Total Episodes: ${item.totalEp || 0}<br>
                         Watched Episodes: ${item.watchedEp || 0}<br>
                         Pending Episodes: ${item.pendingEp || 0}<br>
                         Last Watched: ${item.lastWatched || 'N/A'}
@@ -548,7 +561,7 @@
             } else if (item.category === 'completed') {
                 cardHTML += `
                     <div class="anime-meta">
-                        Total Episodes: ${item.totalEp || 0}<br>
+                        ${seasonStr}Total Episodes: ${item.totalEp || 0}<br>
                         Rating: ${item.rating || 'N/A'}<br>
                         Year Watched: ${item.watchYear || 'N/A'}
                     </div>
@@ -566,7 +579,7 @@
         let sortOption = document.getElementById('sortOption').value;
 
         let filtered = animeData.filter(item => {
-            let matchesSearch = item.title.toLowerCase().includes(query) || (item.season && item.season.toLowerCase().includes(query));
+            let matchesSearch = item.title.toLowerCase().includes(query) || (item.season && item.season.toString().toLowerCase().includes(query));
             let matchesCat = (selectedCategory === 'all' || item.category === selectedCategory);
             return matchesSearch && matchesCat;
         });
@@ -583,3 +596,4 @@
 
 </body>
 </html>
+
