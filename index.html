@@ -92,7 +92,7 @@
         <div class="filter-group">
             <label>SORT BY:</label>
             <select id="sortOption" onchange="filterAndSort()">
-                <option value="none">Default / None</option>
+                <option value="custom">Custom Order (My Order)</option>
                 <option value="high-low">High to Low (Largest First)</option>
                 <option value="low-high">Low to High (Smallest First)</option>
             </select>
@@ -161,8 +161,10 @@
             querySnapshot.forEach((docSnap) => {
                 let item = docSnap.data();
                 item.id = docSnap.id;
+                if (item.order === undefined) item.order = Date.now();
                 animeData.push(item);
             });
+            animeData.sort((a, b) => a.order - b.order);
             filterAndSort();
         } catch (error) {
             console.error("Error fetching data: ", error);
@@ -282,7 +284,7 @@
 
         if (editingId !== null && (!fileInput.files || !fileInput.files[0])) {
             let existingItem = animeData.find(item => item.id === editingId);
-            processCardCreation(category, title, season, existingItem.poster);
+            processCardCreation(category, title, season, existingItem.poster, existingItem.order);
             return;
         }
 
@@ -292,12 +294,12 @@
         }
 
         compressImage(fileInput.files[0], function(compressedBase64) {
-            processCardCreation(category, title, season, compressedBase64);
+            processCardCreation(category, title, season, compressedBase64, Date.now());
         });
     }
 
-    async function processCardCreation(category, title, season, poster) {
-        let newCard = { category, title, season: season || '', poster };
+    async function processCardCreation(category, title, season, poster, orderVal) {
+        let newCard = { category, title, season: season || '', poster, order: orderVal !== undefined ? orderVal : Date.now() };
         fillCardDataFromForm(newCard, category, "input");
 
         try {
@@ -372,6 +374,27 @@
         allMenus.forEach(menu => menu.style.display = 'none');
     };
 
+    window.moveOrder = async function(index, direction) {
+        let targetIndex = index + direction;
+        if (targetIndex < 0 || targetIndex >= animeData.length) return;
+
+        let currentItem = animeData[index];
+        let targetItem = animeData[targetIndex];
+
+        let tempOrder = currentItem.order;
+        currentItem.order = targetItem.order;
+        targetItem.order = tempOrder;
+
+        try {
+            await updateDoc(doc(db, "animes", currentItem.id), { order: currentItem.order });
+            await updateDoc(doc(db, "animes", targetItem.id), { order: targetItem.order });
+            await fetchAnimeFromFirebase();
+        } catch (err) {
+            console.error(err);
+            alert("Error updating order!");
+        }
+    }
+
     window.openMoveModal = function(index) {
         movingIndex = index;
         let item = animeData[index];
@@ -411,7 +434,8 @@
             title: item.title,
             season: item.season || '',
             poster: item.poster,
-            category: newCategory
+            category: newCategory,
+            order: item.order || Date.now()
         };
 
         fillCardDataFromForm(updatedCard, newCategory, "moveInput");
@@ -481,6 +505,7 @@
         let clonedItem = JSON.parse(JSON.stringify(animeData[index]));
         delete clonedItem.id;
         clonedItem.title += " (Copy)";
+        clonedItem.order = Date.now();
         await addDoc(collection(db, "animes"), clonedItem);
         await fetchAnimeFromFirebase();
     }
@@ -513,7 +538,9 @@
                     <div class="card-menu-container" style="display: block;">
                         <button class="dots-btn" onclick="toggleCardMenu(${originalIndex}, event)">⋮</button>
                         <div id="menu-${originalIndex}" class="dropdown-menu">
-                            <button onclick="openMoveModal(${originalIndex})" style="color: #38bdf8; font-weight: bold;">🔁 Move To...</button>
+                            <button onclick="moveOrder(${originalIndex}, -1)">⬆️ Move Up</button>
+                            <button onclick="moveOrder(${originalIndex}, 1)">⬇️ Move Down</button>
+                            <button onclick="openMoveModal(${originalIndex})" style="color: #38bdf8; font-weight: bold;">🔁 Move To Category...</button>
                             <button onclick="editCard(${originalIndex})">✏️ Edit</button>
                             <button onclick="deleteCard(${originalIndex})">🗑️ Delete</button>
                             <button onclick="cloneCard(${originalIndex})">📑 Clone</button>
@@ -588,6 +615,8 @@
             filtered.sort((a, b) => (b.totalEp || parseInt(b.episodes) || 0) - (a.totalEp || parseInt(a.episodes) || 0));
         } else if (sortOption === 'low-high') {
             filtered.sort((a, b) => (a.totalEp || parseInt(a.episodes) || 0) - (b.totalEp || parseInt(b.episodes) || 0));
+        } else if (sortOption === 'custom') {
+            filtered.sort((a, b) => a.order - b.order);
         }
 
         renderCards(filtered);
