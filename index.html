@@ -5,15 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Premium Anime Hub</title>
     <style>
-        body { margin: 0; padding: 0; background: #090d16; font-family: 'Segoe UI', sans-serif; color: #fff; }
-        .anime-wrapper { max-width: 800px; margin: 20px auto; background: #0f172a; padding: 20px; border-radius: 12px; }
-        h2 { text-align: center; color: #38bdf8; text-transform: uppercase; }
+        body { margin: 0; padding: 0; background: #0b0e14; font-family: 'Segoe UI', sans-serif; color: #fff; }
+        .anime-wrapper { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        /* Admin Header */
         .admin-btn { background: #38bdf8; color: #0f172a; padding: 10px 20px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; display: block; margin: 0 auto 20px; }
         .logout-btn { background: #ef4444; color: #fff; padding: 8px 15px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; float: right; margin-bottom: 10px; }
         .admin-panel, .modal { background: #1e293b; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155; }
         .admin-panel { display: none; }
         
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background: #1e293b; padding: 20px; border-radius: 10px; width: 90%; max-width: 500px; border: 1px solid #38bdf8; max-height: 90vh; overflow-y: auto; }
         
         input, select { width: 100%; padding: 10px; margin-bottom: 10px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 4px; box-sizing: border-box; }
@@ -21,28 +22,42 @@
         .action-btn { width: 100%; padding: 10px; background: #38bdf8; color: #0f172a; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 5px; }
         .close-btn { background: #64748b; color: white; margin-top: 5px; }
         
-        .filter-toolbar { background: rgba(30, 41, 59, 0.7); border: 1px solid #334155; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; }
+        /* Filter Toolbar */
+        .filter-toolbar { background: rgba(30, 41, 59, 0.7); border: 1px solid #334155; padding: 15px; border-radius: 8px; margin-bottom: 25px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; }
         .filter-group { display: flex; flex-direction: column; gap: 4px; min-width: 160px; flex: 1; }
         .filter-group label { font-size: 0.75em; color: #38bdf8; font-weight: 600; }
-        
-        .anime-card { background: #1e293b; border-radius: 8px; overflow: hidden; margin-bottom: 15px; border: 1px solid #334155; position: relative; }
-        .card-menu-container { position: absolute; top: 10px; right: 10px; z-index: 10; display: none; }
-        .dots-btn { background: rgba(15, 23, 42, 0.85); color: #fff; border: 1px solid #334155; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-size: 1rem; font-weight: bold; }
-        .dropdown-menu { display: none; position: absolute; right: 0; top: 35px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); width: 170px; overflow: hidden; }
-        .dropdown-menu button { width: 100%; background: none; border: none; color: #fff; padding: 8px 12px; text-align: left; cursor: pointer; font-size: 0.85rem; border-bottom: 1px solid #1e293b; }
-        .dropdown-menu button:hover { background: #38bdf8; color: #0f172a; }
 
-        .anime-poster { width: 100%; height: auto; display: block; max-height: 400px; object-fit: cover; }
-        .anime-info { padding: 15px; text-align: left; }
-        .anime-title { color: #fff; font-size: 1.2rem; margin: 0 0 10px 0; }
-        .anime-meta { color: #94a3b8; font-size: 0.85rem; margin-bottom: 10px; line-height: 1.5; }
-        .btn-container { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-        .link-btn { flex: 1; min-width: 80px; display: block; padding: 8px; text-align: center; color: #0f172a; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 0.85rem; }
+        /* Crunchyroll Style Section Rows */
+        .section-title { font-size: 1.4rem; color: #fff; font-weight: bold; margin: 25px 0 12px 0; display: flex; align-items: center; gap: 8px; border-left: 4px solid #f97316; padding-left: 10px; }
+        
+        .anime-row { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 15px; scroll-behavior: smooth; }
+        .anime-row::-webkit-scrollbar { height: 8px; }
+        .anime-row::-webkit-scrollbar-track { background: #0f172a; border-radius: 10px; }
+        .anime-row::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .anime-row::-webkit-scrollbar-thumb:hover { background: #f97316; }
+
+        /* Poster Card Layout */
+        .anime-card { flex: 0 0 170px; background: #141b2d; border-radius: 8px; overflow: hidden; border: 1px solid #1e293b; position: relative; transition: transform 0.2s ease; display: flex; flex-direction: column; }
+        .anime-card:hover { transform: translateY(-4px); border-color: #f97316; }
+        
+        .card-menu-container { position: absolute; top: 6px; right: 6px; z-index: 10; display: none; }
+        .dots-btn { background: rgba(0,0,0,0.75); color: #fff; border: 1px solid #334155; padding: 4px 10px; border-radius: 15px; cursor: pointer; font-size: 0.9rem; font-weight: bold; }
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 30px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.7); width: 160px; overflow: hidden; z-index: 20; }
+        .dropdown-menu button { width: 100%; background: none; border: none; color: #fff; padding: 8px 12px; text-align: left; cursor: pointer; font-size: 0.8rem; border-bottom: 1px solid #1e293b; }
+        .dropdown-menu button:hover { background: #f97316; color: #fff; }
+
+        .anime-poster { width: 100%; height: 240px; object-fit: cover; display: block; }
+        .anime-info { padding: 10px; display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1; }
+        .anime-title { color: #fff; font-size: 0.9rem; font-weight: bold; margin: 0 0 6px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .anime-meta { color: #94a3b8; font-size: 0.75rem; margin-bottom: 8px; line-height: 1.4; }
+        
+        .btn-container { display: flex; flex-direction: column; gap: 4px; margin-top: auto; }
+        .link-btn { width: 100%; padding: 5px 0; text-align: center; color: #000; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 0.75rem; box-sizing: border-box; }
         .filepress { background: #38bdf8; }
         .appdrive { background: #22c55e; }
         .hubcloud { background: #a855f7; color: #fff; }
         .customlink { background: #f97316; color: #fff; }
-        .ongoing-btn { background: #f59e0b; display: block; padding: 10px; text-align: center; color: #000; text-decoration: none; border-radius: 6px; font-weight: bold; }
+        .ongoing-btn { background: #f59e0b; display: block; padding: 6px; text-align: center; color: #000; text-decoration: none; border-radius: 4px; font-weight: bold; font-size: 0.75rem; }
     </style>
 </head>
 <body>
@@ -71,7 +86,7 @@
         <button id="saveCardBtn" class="action-btn" onclick="addAnimeCard()">Add Anime Card to List</button>
     </div>
 
-    <h2>⚡ Premium Anime Hub ⚡</h2>
+    <h2 style="text-align: center; color: #f97316; text-transform: uppercase;">⚡ Premium Anime Hub ⚡</h2>
 
     <div class="filter-toolbar">
         <div class="filter-group">
@@ -99,7 +114,7 @@
         </div>
     </div>
 
-    <div id="animeContainer"></div>
+    <div id="animeSectionsContainer"></div>
 </div>
 
 <div id="moveModal" class="modal-overlay">
@@ -145,6 +160,14 @@
     let editingId = null;
     let movingIndex = null;
 
+    const categoryTitles = {
+        'download': 'For Download',
+        'downloaded': 'Downloaded (USB)',
+        'ongoing': 'Ongoing Releases',
+        'watching': 'Currently Watching',
+        'completed': 'Completed Anime'
+    };
+
     window.onload = async function() {
         if (sessionStorage.getItem("isAdminLoggedIn") === "true") {
             document.getElementById('adminPanel').style.display = 'block';
@@ -168,7 +191,7 @@
             filterAndSort();
         } catch (error) {
             console.error("Error fetching data: ", error);
-            alert("Database Connection Error! Please check Firebase Security Rules.");
+            alert("Database Connection Error!");
         }
     }
 
@@ -204,13 +227,13 @@
     function getFieldsHTML(cat, prefix = "input") {
         if (cat === 'download') {
             return `
-                <input type="number" id="${prefix}Episodes" placeholder="Total Episodes (e.g. 12)">
-                <input type="text" id="${prefix}Quality" placeholder="Quality (e.g. 720p HEVC)">
+                <input type="number" id="${prefix}Episodes" placeholder="Total Episodes">
+                <input type="text" id="${prefix}Quality" placeholder="Quality (e.g. 720p)">
                 <input type="text" id="${prefix}Size" placeholder="File Size (e.g. 1.04GB)">
-                <input type="text" id="${prefix}Filepress" placeholder="FilePress Link (Optional)">
-                <input type="text" id="${prefix}Appdrive" placeholder="AppDrive Link (Optional)">
-                <input type="text" id="${prefix}Hubcloud" placeholder="HubCloud Link (Optional)">
-                <input type="text" id="${prefix}Link" placeholder="Other Link (Optional)">
+                <input type="text" id="${prefix}Filepress" placeholder="FilePress Link">
+                <input type="text" id="${prefix}Appdrive" placeholder="AppDrive Link">
+                <input type="text" id="${prefix}Hubcloud" placeholder="HubCloud Link">
+                <input type="text" id="${prefix}Link" placeholder="Other Link">
             `;
         } else if (cat === 'downloaded') {
             return `
@@ -219,26 +242,26 @@
                     <option value="SanDisk 32GB USB">SanDisk 32GB USB</option>
                     <option value="SanDisk 8GB USB">SanDisk 8GB USB</option>
                 </select>
-                <input type="number" id="${prefix}Episodes" placeholder="Total Episodes (e.g. 12)">
-                <input type="text" id="${prefix}Quality" placeholder="Quality (e.g. 1080p)">
-                <input type="text" id="${prefix}Size" placeholder="File Size (e.g. 2.1GB)">
+                <input type="number" id="${prefix}Episodes" placeholder="Total Episodes">
+                <input type="text" id="${prefix}Quality" placeholder="Quality">
+                <input type="text" id="${prefix}Size" placeholder="File Size">
             `;
         } else if (cat === 'ongoing') {
             return `
-                <input type="text" id="${prefix}Episodes" placeholder="Ongoing Episode (e.g. 5)">
-                <input type="text" id="${prefix}Link" placeholder="Ongoing Page Link">
+                <input type="text" id="${prefix}Episodes" placeholder="Ongoing Ep (e.g. Ep 5)">
+                <input type="text" id="${prefix}Link" placeholder="Ongoing Link">
             `;
         } else if (cat === 'watching') {
             return `
                 <input type="number" id="${prefix}TotalEp" placeholder="Total Episodes">
                 <input type="number" id="${prefix}WatchedEp" placeholder="Watched Episodes">
-                <input type="text" id="${prefix}LastWatched" placeholder="Last Watched Details (e.g. Ep 4)">
+                <input type="text" id="${prefix}LastWatched" placeholder="Last Watched (e.g. Ep 4)">
             `;
         } else if (cat === 'completed') {
             return `
                 <input type="number" id="${prefix}TotalEp" placeholder="Total Episodes">
-                <input type="text" id="${prefix}Rating" placeholder="Your Rating (e.g. 9/10)">
-                <input type="text" id="${prefix}WatchYear" placeholder="Year Watched (e.g. 2026)">
+                <input type="text" id="${prefix}Rating" placeholder="Rating (e.g. 9/10)">
+                <input type="text" id="${prefix}WatchYear" placeholder="Year Watched">
             `;
         }
     }
@@ -246,7 +269,7 @@
     function formatSeasonText(val) {
         if (!val) return '';
         let str = val.toString().trim();
-        return str.toLowerCase().startsWith('season') ? str : `Season ${str}`;
+        return str.toLowerCase().startsWith('season') ? str : `S${str}`;
     }
 
     function formatEpText(val) {
@@ -317,7 +340,7 @@
             await fetchAnimeFromFirebase();
         } catch (error) {
             console.error("Firebase Error: ", error);
-            alert("Error saving data to Cloud. Please check Firebase Rules.");
+            alert("Error saving data!");
         }
     }
 
@@ -518,7 +541,7 @@
     }
 
     function renderCards(data) {
-        const container = document.getElementById('animeContainer');
+        const container = document.getElementById('animeSectionsContainer');
         container.innerHTML = '';
 
         if (data.length === 0) {
@@ -527,76 +550,94 @@
         }
 
         let isAdmin = sessionStorage.getItem("isAdminLoggedIn") === "true";
+        let selectedCategory = document.getElementById('filterCategory').value;
 
-        data.forEach((item) => {
-            let originalIndex = animeData.indexOf(item);
+        // Group anime by category
+        let categoriesToRender = selectedCategory === 'all' 
+            ? ['download', 'downloaded', 'ongoing', 'watching', 'completed'] 
+            : [selectedCategory];
 
-            let cardHTML = `<div class="anime-card">`;
+        categoriesToRender.forEach(catKey => {
+            let catAnimeList = data.filter(item => item.category === catKey);
 
-            if (isAdmin) {
-                cardHTML += `
-                    <div class="card-menu-container" style="display: block;">
-                        <button class="dots-btn" onclick="toggleCardMenu(${originalIndex}, event)">⋮</button>
-                        <div id="menu-${originalIndex}" class="dropdown-menu">
-                            <button onclick="moveOrder(${originalIndex}, -1)">⬆️ Move Up</button>
-                            <button onclick="moveOrder(${originalIndex}, 1)">⬇️ Move Down</button>
-                            <button onclick="openMoveModal(${originalIndex})" style="color: #38bdf8; font-weight: bold;">🔁 Move To Category...</button>
-                            <button onclick="editCard(${originalIndex})">✏️ Edit</button>
-                            <button onclick="deleteCard(${originalIndex})">🗑️ Delete</button>
-                            <button onclick="cloneCard(${originalIndex})">📑 Clone</button>
-                            <button onclick="shareCard(${originalIndex})">🔗 Share</button>
-                        </div>
-                    </div>`;
+            if (catAnimeList.length > 0) {
+                let sectionHTML = `
+                    <div class="section-title">${categoryTitles[catKey] || catKey}</div>
+                    <div class="anime-row">
+                `;
+
+                catAnimeList.forEach(item => {
+                    let originalIndex = animeData.indexOf(item);
+                    let seasonStr = item.season ? `${formatSeasonText(item.season)} | ` : '';
+                    let epStr = formatEpText(item.episodes || item.totalEp);
+
+                    let cardHTML = `<div class="anime-card">`;
+
+                    if (isAdmin) {
+                        cardHTML += `
+                            <div class="card-menu-container" style="display: block;">
+                                <button class="dots-btn" onclick="toggleCardMenu(${originalIndex}, event)">⋮</button>
+                                <div id="menu-${originalIndex}" class="dropdown-menu">
+                                    <button onclick="moveOrder(${originalIndex}, -1)">⬅️ Move Left</button>
+                                    <button onclick="moveOrder(${originalIndex}, 1)">➡️ Move Right</button>
+                                    <button onclick="openMoveModal(${originalIndex})" style="color: #38bdf8; font-weight: bold;">🔁 Move Section</button>
+                                    <button onclick="editCard(${originalIndex})">✏️ Edit</button>
+                                    <button onclick="deleteCard(${originalIndex})">🗑️ Delete</button>
+                                    <button onclick="cloneCard(${originalIndex})">📑 Clone</button>
+                                    <button onclick="shareCard(${originalIndex})">🔗 Share</button>
+                                </div>
+                            </div>`;
+                    }
+
+                    cardHTML += `
+                        <img src="${item.poster}" class="anime-poster" alt="Poster">
+                        <div class="anime-info">
+                            <h3 class="anime-title" title="${item.title}">${item.title}</h3>
+                    `;
+
+                    if (item.category === 'download') {
+                        cardHTML += `<div class="anime-meta">${seasonStr}${epStr}<br>Qual: ${item.quality || 'N/A'}<br>Size: ${item.size || 'N/A'}</div>`;
+                        cardHTML += `<div class="btn-container">`;
+                        if (item.filepress) cardHTML += `<a href="${item.filepress}" class="link-btn filepress" target="_blank">FilePress</a>`;
+                        if (item.appdrive) cardHTML += `<a href="${item.appdrive}" class="link-btn appdrive" target="_blank">AppDrive</a>`;
+                        if (item.hubcloud) cardHTML += `<a href="${item.hubcloud}" class="link-btn hubcloud" target="_blank">HubCloud</a>`;
+                        if (item.link) cardHTML += `<a href="${item.link}" class="link-btn customlink" target="_blank">Link</a>`;
+                        cardHTML += `</div>`;
+                    } else if (item.category === 'downloaded') {
+                        cardHTML += `
+                            <div class="anime-meta" style="color: #22c55e; font-weight: bold;">💾 ${item.usbDrive}</div>
+                            <div class="anime-meta">${seasonStr}${epStr}<br>Qual: ${item.quality || 'N/A'}</div>
+                        `;
+                    } else if (item.category === 'ongoing') {
+                        cardHTML += `
+                            <div class="anime-meta">${seasonStr}Status: ${item.episodes ? formatEpText(item.episodes) : 'Ongoing'}</div>
+                            <a href="${item.link || '#'}" class="ongoing-btn" target="_blank">Ongoing Link</a>
+                        `;
+                    } else if (item.category === 'watching') {
+                        cardHTML += `
+                            <div class="anime-meta">
+                                ${seasonStr}Total: ${item.totalEp || 0}<br>
+                                Watched: ${item.watchedEp || 0}<br>
+                                Left: ${item.lastWatched || 'N/A'}
+                            </div>
+                        `;
+                    } else if (item.category === 'completed') {
+                        cardHTML += `
+                            <div class="anime-meta">
+                                ${seasonStr}Total: ${item.totalEp || 0}<br>
+                                Rating: ${item.rating || 'N/A'}<br>
+                                Watched: ${item.watchYear || 'N/A'}
+                            </div>
+                        `;
+                    }
+
+                    cardHTML += `</div></div>`;
+                    sectionHTML += cardHTML;
+                });
+
+                sectionHTML += `</div>`;
+                container.innerHTML += sectionHTML;
             }
-
-            let seasonStr = item.season ? `${formatSeasonText(item.season)} | ` : '';
-            let epStr = formatEpText(item.episodes || item.totalEp);
-
-            cardHTML += `
-                    <img src="${item.poster}" class="anime-poster" alt="Poster">
-                    <div class="anime-info">
-                        <h3 class="anime-title">${item.title}</h3>
-            `;
-
-            if (item.category === 'download') {
-                cardHTML += `<div class="anime-meta">${seasonStr}${epStr} | Quality: ${item.quality || 'N/A'} | Size: ${item.size || 'N/A'}</div>`;
-                cardHTML += `<div class="btn-container">`;
-                if (item.filepress) cardHTML += `<a href="${item.filepress}" class="link-btn filepress" target="_blank">FilePress</a>`;
-                if (item.appdrive) cardHTML += `<a href="${item.appdrive}" class="link-btn appdrive" target="_blank">AppDrive</a>`;
-                if (item.hubcloud) cardHTML += `<a href="${item.hubcloud}" class="link-btn hubcloud" target="_blank">HubCloud</a>`;
-                if (item.link) cardHTML += `<a href="${item.link}" class="link-btn customlink" target="_blank">Link</a>`;
-                cardHTML += `</div>`;
-            } else if (item.category === 'downloaded') {
-                cardHTML += `
-                    <div class="anime-meta" style="color: #22c55e; font-weight: bold;">💾 Saved on: ${item.usbDrive}</div>
-                    <div class="anime-meta">${seasonStr}${epStr} | Quality: ${item.quality || 'N/A'} | Size: ${item.size || 'N/A'}</div>
-                `;
-            } else if (item.category === 'ongoing') {
-                cardHTML += `
-                    <div class="anime-meta">${seasonStr}Status: ${item.episodes ? formatEpText(item.episodes) : 'Ongoing'}</div>
-                    <a href="${item.link || '#'}" class="ongoing-btn" target="_blank">Ongoing Page</a>
-                `;
-            } else if (item.category === 'watching') {
-                cardHTML += `
-                    <div class="anime-meta">
-                        ${seasonStr}Total Episodes: ${item.totalEp || 0}<br>
-                        Watched Episodes: ${item.watchedEp || 0}<br>
-                        Pending Episodes: ${item.pendingEp || 0}<br>
-                        Last Watched: ${item.lastWatched || 'N/A'}
-                    </div>
-                `;
-            } else if (item.category === 'completed') {
-                cardHTML += `
-                    <div class="anime-meta">
-                        ${seasonStr}Total Episodes: ${item.totalEp || 0}<br>
-                        Rating: ${item.rating || 'N/A'}<br>
-                        Year Watched: ${item.watchYear || 'N/A'}
-                    </div>
-                `;
-            }
-
-            cardHTML += `</div></div>`;
-            container.innerHTML += cardHTML;
         });
     }
 
