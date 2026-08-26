@@ -2,12 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- Viewport Auto-Fit Fix: Auto Zoom-Out for Desktop View -->
     <meta name="viewport" content="width=1280">
     <title>Premium Anime Hub</title>
-
-    <!-- Cropper.js CSS for Image Cropping -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
 
     <style>
         body { margin: 0; padding: 0; background: #0b0e14; font-family: 'Segoe UI', sans-serif; color: #fff; }
@@ -31,30 +27,33 @@
 
         .section-title { font-size: 1.8rem; color: #fff; font-weight: bold; margin: 30px 0 15px 0; display: flex; align-items: center; gap: 8px; border-left: 6px solid #f97316; padding-left: 14px; }
         
-        /* Auto Wrapping Grid Container */
         .anime-row-wrapper { width: 100%; }
+        
+        /* EXACT 4 CARDS PER ROW GRID LAYOUT */
         .anime-row { 
-            display: flex; 
-            flex-wrap: wrap; 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
             gap: 20px; 
             width: 100%; 
             box-sizing: border-box; 
             align-items: stretch; 
         }
 
-        .anime-card { background: #141b2d; border-radius: 10px; overflow: visible; border: 1px solid #1e293b; position: relative; transition: all 0.3s ease; display: flex; flex-direction: column; cursor: pointer; }
+        .anime-card { background: #141b2d; border-radius: 10px; overflow: visible; border: 1px solid #1e293b; position: relative; transition: all 0.3s ease; display: flex; flex-direction: column; cursor: pointer; width: 100%; }
         .anime-card:hover { transform: translateY(-4px); border-color: #f97316; }
 
-        /* Larger Card Sizes for High Visibility */
-        .card-portrait { width: 260px; flex-shrink: 0; }
-        .card-portrait .anime-poster { width: 100%; height: 330px; object-fit: cover; display: block; border-radius: 10px 10px 0 0; }
+        /* POSTER ASPECT RATIO DIMENSIONS */
+        .card-portrait { width: 100%; flex-shrink: 0; }
+        .card-portrait .anime-poster { 
+            width: 100%; 
+            height: 365px; 
+            object-fit: cover; 
+            display: block; 
+            border-radius: 10px 10px 0 0; 
+        }
 
-        .card-landscape { width: 380px; flex-shrink: 0; }
-        .card-landscape .anime-poster { width: 100%; height: 230px; object-fit: cover; display: block; border-radius: 10px 10px 0 0; }
-
-        /* Skeleton Loading Cards */
-        .skeleton-card { background: #141b2d; border-radius: 10px; border: 1px solid #1e293b; flex-shrink: 0; width: 260px; height: 440px; padding: 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; }
-        .skeleton-poster { width: 100%; height: 300px; background: #1e293b; border-radius: 6px; animation: skeletonPulse 1.2s infinite ease-in-out; }
+        .skeleton-card { background: #141b2d; border-radius: 10px; border: 1px solid #1e293b; width: 100%; height: 480px; padding: 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; }
+        .skeleton-poster { width: 100%; height: 365px; background: #1e293b; border-radius: 6px; animation: skeletonPulse 1.2s infinite ease-in-out; }
         .skeleton-text { height: 20px; background: #1e293b; border-radius: 4px; animation: skeletonPulse 1.2s infinite ease-in-out; }
         .skeleton-text.short { width: 60%; }
         
@@ -64,15 +63,14 @@
             100% { opacity: 0.4; }
         }
 
-        /* Badge Styles */
         .badges-container { position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 6px; z-index: 10; }
+        .code-badge { position: absolute; top: 10px; right: 10px; background: #a855f7; color: #ffffff; font-size: 0.8rem; font-weight: 800; padding: 4px 8px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.6); z-index: 10; }
         .pin-badge { background: #f59e0b; color: #000; font-size: 0.85rem; font-weight: 800; padding: 4px 10px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.6); }
         .new-badge { background: #22c55e; color: #000; font-size: 0.85rem; font-weight: 800; padding: 4px 10px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.6); animation: pulseGreen 2s infinite alternate; }
         
         @keyframes pulseGreen { from { opacity: 1; } to { opacity: 0.7; } }
         .anime-card.pinned-card { border: 2px solid #f59e0b; }
 
-        /* High Visibility Spotlight Feature for Selected Season Jump */
         #spotlightOverlay {
             display: none;
             position: fixed;
@@ -86,7 +84,7 @@
         .spotlight-active {
             position: relative !important;
             z-index: 1001 !important;
-            transform: scale(1.15) !important;
+            transform: scale(1.05) !important;
             box-shadow: 0 0 35px #f97316, 0 0 70px #38bdf8 !important;
             border: 3px solid #f97316 !important;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
@@ -115,28 +113,19 @@
             100% { transform: translate(-50%, -10px); }
         }
 
-        .card-menu-container { position: absolute; top: 10px; right: 10px; z-index: 10; display: none; }
+        .card-menu-container { position: absolute; top: 10px; right: 10px; z-index: 20; display: none; }
+        .card-menu-container.has-code { top: 38px; }
         .dots-btn { background: rgba(0,0,0,0.85); color: #fff; border: 1px solid #334155; padding: 6px 12px; border-radius: 18px; cursor: pointer; font-size: 1.1rem; font-weight: bold; }
-        .dropdown-menu { display: none; position: absolute; right: 0; top: 35px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.8); width: 190px; overflow: hidden; z-index: 20; }
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 35px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.8); width: 190px; overflow: hidden; z-index: 30; }
         .dropdown-menu button { width: 100%; background: none; border: none; color: #fff; padding: 10px 14px; text-align: left; cursor: pointer; font-size: 0.9rem; border-bottom: 1px solid #1e293b; }
         .dropdown-menu button:hover { background: #f97316; color: #fff; }
 
-        /* ENLARGED UI ELEMENTS FOR HIGH READABILITY */
         .anime-info { padding: 14px; display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1; background: #141b2d; border-radius: 0 0 10px 10px; }
-        
-        /* Bolder & Larger Title */
         .anime-title { color: #fff; font-size: 1.25rem; font-weight: 800; margin: 0 0 8px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.3px; }
-        
-        /* Larger Season Badge */
         .season-badge { display: inline-block; background: #f97316; color: #ffffff; font-size: 0.95rem; font-weight: 900; padding: 4px 10px; border-radius: 5px; text-transform: uppercase; margin-bottom: 8px; align-self: flex-start; letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
-
-        /* Larger Season Dropdown */
         .other-seasons-select { width: 100%; background: #0f172a; color: #38bdf8; border: 1.5px solid #38bdf8; font-size: 0.95rem; font-weight: bold; padding: 8px 6px; border-radius: 6px; margin-bottom: 8px; cursor: pointer; text-align: center; }
-
-        /* Larger Details Text (EP, Quality, Size) */
         .anime-meta { color: #cbd5e1; font-size: 0.95rem; font-weight: 600; margin-bottom: 10px; line-height: 1.5; }
         
-        /* Larger Download Buttons */
         .btn-container { display: flex; flex-direction: column; gap: 8px; margin-top: auto; }
         .link-btn { width: 100%; padding: 10px 0; text-align: center; color: #000; text-decoration: none; border-radius: 6px; font-weight: 800; font-size: 0.95rem; box-sizing: border-box; transition: transform 0.1s ease; }
         .link-btn:active { transform: scale(0.98); }
@@ -156,12 +145,6 @@
 
         .sub-box { background: #0f172a; border: 1px solid #334155; padding: 10px; border-radius: 6px; margin-bottom: 12px; }
         .sub-box-title { font-size: 0.85rem; color: #38bdf8; font-weight: bold; margin-bottom: 6px; display: block; }
-        
-        .crop-container { width: 100%; min-height: 320px; max-height: 480px; background: #000; margin-bottom: 15px; overflow: hidden; border-radius: 6px; position: relative; }
-        .crop-container img { max-width: 100%; display: block; }
-
-        .cropper-point { width: 12px !important; height: 12px !important; background-color: #38bdf8 !important; opacity: 0.9 !important; }
-        .cropper-line { background-color: #f97316 !important; }
 
         /* FULLSCREEN DETAIL VIEW MODAL STYLES */
         .detail-modal-overlay {
@@ -197,7 +180,6 @@
             to { opacity: 1; transform: scale(1); }
         }
 
-        /* Red Circle Close Button with White X */
         .close-detail-btn {
             position: absolute;
             top: 15px;
@@ -238,11 +220,12 @@
             overflow: hidden;
             box-shadow: 0 6px 18px rgba(0,0,0,0.6);
             border: 1px solid #334155;
+            aspect-ratio: 1920 / 2700;
         }
 
         .detail-poster-wrapper img {
             width: 100%;
-            height: auto;
+            height: 100%;
             display: block;
             object-fit: cover;
         }
@@ -306,7 +289,6 @@
 </head>
 <body>
 
-<!-- Dark Backdrop for Target Season Spotlight -->
 <div id="spotlightOverlay"></div>
 
 <div class="anime-wrapper">
@@ -326,20 +308,15 @@
         </select>
         
         <input type="text" id="inputTitle" placeholder="Anime Title">
+        <input type="text" id="inputCode" placeholder="Anime Code (e.g. ANM-01, S1-05)">
         <input type="number" id="inputSeason" placeholder="Season Number (e.g., 1, 2)">
 
-        <label style="font-size: 0.85rem; color: #38bdf8; display: block; margin-bottom: 5px;">Select Poster Orientation:</label>
-        <select id="inputOrientation">
-            <option value="portrait">Portrait (Vertical / Tall Poster)</option>
-            <option value="landscape">Landscape (Horizontal / Wide Poster)</option>
-        </select>
-        
-        <label style="font-size: 0.85rem; color: #38bdf8; display: block; margin-bottom: 5px;">Poster Image (Optional when editing):</label>
+        <label style="font-size: 0.85rem; color: #38bdf8; display: block; margin-bottom: 5px;">Poster Image (Aspect Ratio: 1920x2700):</label>
         <input type="file" id="inputPosterFile" accept="image/*">
         
         <div id="posterPreviewContainer" style="display:none; margin-bottom: 10px; align-items: center; gap: 10px;">
-            <img id="posterPreviewImg" src="" style="width: 70px; height: 90px; object-fit: cover; border-radius: 4px; border: 1px solid #38bdf8;">
-            <span style="font-size: 0.85rem; color: #22c55e; font-weight: bold;">✓ Poster Cropped & Ready</span>
+            <img id="posterPreviewImg" src="" style="width: 70px; height: 98px; object-fit: cover; border-radius: 4px; border: 1px solid #38bdf8;">
+            <span style="font-size: 0.85rem; color: #22c55e; font-weight: bold;">✓ Poster Selected</span>
         </div>
 
         <div id="dynamicFields"></div>
@@ -352,7 +329,7 @@
     <div class="filter-toolbar">
         <div class="filter-group">
             <label>SEARCH ANIME:</label>
-            <input type="text" id="searchBox" placeholder="Search by name..." oninput="filterAndSort()">
+            <input type="text" id="searchBox" placeholder="Search by name or code..." oninput="filterAndSort()">
         </div>
         <div class="filter-group">
             <label>CATEGORY:</label>
@@ -368,14 +345,14 @@
         <div class="filter-group">
             <label>SORT BY:</label>
             <select id="sortOption" onchange="filterAndSort()">
-                <option value="custom">Custom Order (My Order)</option>
+                <option value="newest">Newest First (Naya Pehle)</option>
+                <option value="oldest">Oldest First (Purana Pehle)</option>
                 <option value="high-low">High to Low (Largest First)</option>
                 <option value="low-high">Low to High (Smallest First)</option>
             </select>
         </div>
     </div>
 
-    <!-- Instant Pre-Render Skeleton Structure -->
     <div id="animeSectionsContainer">
         <div class="section-title">For Download</div>
         <div class="anime-row-wrapper">
@@ -386,30 +363,6 @@
                 <div class="skeleton-card"><div class="skeleton-poster"></div><div class="skeleton-text"></div><div class="skeleton-text short"></div></div>
             </div>
         </div>
-    </div>
-</div>
-
-<!-- Image Crop Modal -->
-<div id="cropModal" class="modal-overlay">
-    <div class="modal-content">
-        <h3 style="color: #38bdf8; margin-top:0;">✂️ Crop Poster Image</h3>
-        
-        <div style="margin-bottom: 10px;">
-            <label style="font-size: 0.85rem; color: #38bdf8; font-weight: bold;">Crop Style / Drag Handles Mode:</label>
-            <select id="cropModeSelect" onchange="changeCropMode()" style="margin-top: 4px;">
-                <option value="free">🖐️ Free Stretch (Khinch Kar Har Side Se Crop Karein)</option>
-                <option value="fixed">🔒 Lock Ratio (Fixed Card Shape)</option>
-            </select>
-        </div>
-
-        <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 10px;">Ungaliyon ya mouse se rectangle ke kisi bhi side/corner ko khinch kar crop area adjust karein:</p>
-        
-        <div class="crop-container">
-            <img id="cropImageTarget" src="">
-        </div>
-
-        <button class="action-btn" style="background: #22c55e; color: #000;" onclick="applyCrop()">✂️ Crop & Save Poster</button>
-        <button class="action-btn close-btn" onclick="closeCropModal()">Cancel</button>
     </div>
 </div>
 
@@ -483,7 +436,6 @@
 <!-- FULLSCREEN ANIME DETAIL VIEW MODAL -->
 <div id="animeDetailModal" class="detail-modal-overlay">
     <div class="detail-card-container">
-        <!-- Red Circle Close Button with White 'X' -->
         <button class="close-detail-btn" onclick="closeAnimeDetailModal()">✕</button>
         
         <div class="detail-layout">
@@ -496,6 +448,7 @@
                 <h2 id="detailTitle" class="detail-title">Anime Title</h2>
                 
                 <div class="detail-meta-group">
+                    <div id="detailCodeRow" class="detail-meta-item" style="display:none;"><span>Anime Code:</span> <div id="detailCodeValue"></div></div>
                     <div id="detailSeasonRow" class="detail-meta-item"><span>Season:</span> <div id="detailSeasonValue"></div></div>
                     <div id="detailEpRow" class="detail-meta-item"><span>Episodes:</span> <div id="detailEpValue"></div></div>
                     <div id="detailQualityRow" class="detail-meta-item"><span>Quality:</span> <div id="detailQualityValue"></div></div>
@@ -508,9 +461,6 @@
         </div>
     </div>
 </div>
-
-<!-- Cropper.js JavaScript -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -537,10 +487,7 @@
     let movingId = null;
     let activeSeasonAnimeId = null;
     let draggedItemId = null;
-
-    // Cropper Variables
-    let cropperInstance = null;
-    let croppedBase64Data = null;
+    let selectedBase64Poster = null;
 
     const categoryTitles = {
         'download': 'For Download',
@@ -559,100 +506,52 @@
         await fetchAnimeFromFirebase();
     };
 
-    // Poster Image Select Listener for Cropping
+    // File selection direct base64 reader (No Cropping)
     document.getElementById('inputPosterFile').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = function(evt) {
-                openCropModal(evt.target.result);
+                selectedBase64Poster = evt.target.result;
+                const previewContainer = document.getElementById('posterPreviewContainer');
+                const previewImg = document.getElementById('posterPreviewImg');
+                previewImg.src = selectedBase64Poster;
+                previewContainer.style.display = 'flex';
             };
             reader.readAsDataURL(file);
         }
     });
 
-    function openCropModal(imageSrc) {
-        const modal = document.getElementById('cropModal');
-        const image = document.getElementById('cropImageTarget');
-        image.src = imageSrc;
-        modal.style.display = 'flex';
-
-        if (cropperInstance) {
-            cropperInstance.destroy();
-        }
-
-        document.getElementById('cropModeSelect').value = 'free';
-
-        cropperInstance = new Cropper(image, {
-            aspectRatio: NaN,
-            viewMode: 0,
-            dragMode: 'crop',
-            autoCropArea: 0.9,
-            cropBoxMovable: true,
-            cropBoxResizable: true,
-            toggleDragModeOnDblclick: false,
-            responsive: true,
-            guides: true,
-            center: true,
-            highlight: true,
-            background: true
-        });
-    }
-
-    window.changeCropMode = function() {
-        if (!cropperInstance) return;
-        const mode = document.getElementById('cropModeSelect').value;
-        if (mode === 'free') {
-            cropperInstance.setAspectRatio(NaN);
-        } else {
-            const orientation = document.getElementById('inputOrientation').value;
-            const aspectRatio = orientation === 'landscape' ? (380 / 230) : (260 / 330);
-            cropperInstance.setAspectRatio(aspectRatio);
-        }
-    }
-
-    window.applyCrop = function() {
-        if (!cropperInstance) return;
-        
-        const canvas = cropperInstance.getCroppedCanvas({
-            width: 800,
-            imageSmoothingEnabled: true,
-            imageSmoothingQuality: 'high',
-        });
-
-        croppedBase64Data = canvas.toDataURL('image/jpeg', 0.85);
-        
-        const previewContainer = document.getElementById('posterPreviewContainer');
-        const previewImg = document.getElementById('posterPreviewImg');
-        previewImg.src = croppedBase64Data;
-        previewContainer.style.display = 'flex';
-
-        closeCropModal();
-    }
-
-    window.closeCropModal = function() {
-        document.getElementById('cropModal').style.display = 'none';
-        if (cropperInstance) {
-            cropperInstance.destroy();
-            cropperInstance = null;
-        }
-    }
-
     async function fetchAnimeFromFirebase() {
         try {
             const querySnapshot = await getDocs(collection(db, "animes"));
             animeData = [];
+            const currentTime = Date.now();
+            const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
+
             querySnapshot.forEach((docSnap) => {
                 let item = docSnap.data();
                 item.id = docSnap.id;
-                if (item.order === undefined) item.order = Date.now();
+
+                if (!item.createdAt) {
+                    item.createdAt = item.order && item.order < 1000000000000 ? (10000000000000 - item.order) : Date.now();
+                }
+
+                if (item.order === undefined) item.order = 10000000000000 - item.createdAt;
+
+                if (item.isNew && (currentTime - item.createdAt > TWO_DAYS_MS)) {
+                    item.isNew = false;
+                    updateDoc(doc(db, "animes", item.id), { isNew: false });
+                }
+
                 if (item.isPinned === undefined) item.isPinned = false;
                 if (item.isNew === undefined) item.isNew = false;
-                if (!item.orientation) item.orientation = 'portrait';
                 if (!item.manualLinkedIds) item.manualLinkedIds = [];
+                if (!item.code) item.code = '';
+
                 animeData.push(item);
             });
-            animeData.sort((a, b) => a.order - b.order);
+
             filterAndSort();
         } catch (error) {
             console.error("Error fetching data: ", error);
@@ -798,12 +697,12 @@
     window.addAnimeCard = function() {
         const category = document.getElementById('inputCategory').value;
         const title = document.getElementById('inputTitle').value;
+        const code = document.getElementById('inputCode').value.trim();
         const season = document.getElementById('inputSeason').value;
-        const orientation = document.getElementById('inputOrientation').value;
 
         if (!title) { alert('Please enter title'); return; }
 
-        let posterToUse = croppedBase64Data;
+        let posterToUse = selectedBase64Poster;
 
         if (editingId !== null && !posterToUse) {
             let existingItem = animeData.find(item => item.id === editingId);
@@ -811,20 +710,35 @@
         }
 
         if (!posterToUse) {
-            alert('Please select and crop a poster image.');
+            alert('Please select a poster image.');
             return;
         }
 
         let existingItem = editingId !== null ? animeData.find(item => item.id === editingId) : null;
-        let orderVal = existingItem ? existingItem.order : Date.now();
+        let now = Date.now();
+        
+        // Ensure new added items get top ordering timestamp priority
+        let orderVal = existingItem ? existingItem.order : now;
+        let createdAtVal = existingItem ? existingItem.createdAt : now;
         let pinVal = existingItem ? (existingItem.isPinned || false) : false;
         let newVal = existingItem ? (existingItem.isNew || false) : true;
 
-        processCardCreation(category, title, season, orientation, posterToUse, orderVal, pinVal, newVal);
+        processCardCreation(category, title, code, season, posterToUse, orderVal, createdAtVal, pinVal, newVal);
     }
 
-    async function processCardCreation(category, title, season, orientation, poster, orderVal, isPinned = false, isNew = true) {
-        let newCard = { category, title, season: season || '', orientation, poster, order: orderVal !== undefined ? orderVal : Date.now(), isPinned: isPinned, isNew: isNew, manualLinkedIds: [] };
+    async function processCardCreation(category, title, code, season, poster, orderVal, createdAtVal, isPinned = false, isNew = true) {
+        let newCard = { 
+            category, 
+            title, 
+            code: code || '',
+            season: season || '', 
+            poster, 
+            order: orderVal !== undefined ? orderVal : Date.now(), 
+            createdAt: createdAtVal || Date.now(),
+            isPinned: isPinned, 
+            isNew: isNew, 
+            manualLinkedIds: [] 
+        };
         fillCardDataFromForm(newCard, category, "input");
 
         try {
@@ -833,7 +747,7 @@
                 alert('Anime updated successfully!');
             } else {
                 await addDoc(collection(db, "animes"), newCard);
-                alert('Anime added successfully with NEW badge!');
+                alert('Anime added successfully to top with NEW badge!');
             }
             resetForm();
             await fetchAnimeFromFirebase();
@@ -874,13 +788,13 @@
 
     window.resetForm = function() {
         editingId = null;
-        croppedBase64Data = null;
+        selectedBase64Poster = null;
         document.getElementById('panelTitle').innerText = "Add New Anime Card";
         document.getElementById('saveCardBtn').innerText = "Add Anime Card to List";
         document.getElementById('cancelEditBtn').style.display = 'none';
         document.getElementById('inputTitle').value = '';
+        document.getElementById('inputCode').value = '';
         document.getElementById('inputSeason').value = '';
-        document.getElementById('inputOrientation').value = 'portrait';
         document.getElementById('inputPosterFile').value = '';
         document.getElementById('posterPreviewContainer').style.display = 'none';
         document.getElementById('posterPreviewImg').src = '';
@@ -989,7 +903,7 @@
         if (!currentItem) return;
 
         let catItems = animeData.filter(a => a.category === currentItem.category && !!a.isPinned === !!currentItem.isPinned);
-        catItems.sort((a, b) => a.order - b.order);
+        catItems.sort((a, b) => b.createdAt - a.createdAt);
 
         let currentIndex = catItems.findIndex(a => a.id === cardId);
         let targetIndex = currentIndex + direction;
@@ -998,13 +912,13 @@
 
         let targetItem = catItems[targetIndex];
 
-        let tempOrder = currentItem.order;
-        currentItem.order = targetItem.order;
-        targetItem.order = tempOrder;
+        let tempOrder = currentItem.createdAt;
+        currentItem.createdAt = targetItem.createdAt;
+        targetItem.createdAt = tempOrder;
 
         try {
-            await updateDoc(doc(db, "animes", currentItem.id), { order: currentItem.order });
-            await updateDoc(doc(db, "animes", targetItem.id), { order: targetItem.order });
+            await updateDoc(doc(db, "animes", currentItem.id), { createdAt: currentItem.createdAt });
+            await updateDoc(doc(db, "animes", targetItem.id), { createdAt: targetItem.createdAt });
             await fetchAnimeFromFirebase();
         } catch (err) {
             console.error(err);
@@ -1052,11 +966,12 @@
         
         let updatedCard = {
             title: item.title,
+            code: item.code || '',
             season: item.season || '',
-            orientation: item.orientation || 'portrait',
             poster: item.poster,
             category: newCategory,
             order: item.order || Date.now(),
+            createdAt: item.createdAt || Date.now(),
             isPinned: item.isPinned || false,
             isNew: item.isNew || false,
             manualLinkedIds: item.manualLinkedIds || []
@@ -1155,13 +1070,15 @@
         let parentAnime = animeData.find(a => a.id === activeSeasonAnimeId);
         if (!parentAnime) return;
 
+        let now = Date.now();
         let newCard = {
             title: parentAnime.title,
+            code: parentAnime.code || '',
             season: seasonNum,
-            orientation: parentAnime.orientation || 'portrait',
             poster: parentAnime.poster,
             category: parentAnime.category,
-            order: Date.now(),
+            order: now,
+            createdAt: now,
             isPinned: false,
             isNew: true,
             manualLinkedIds: [activeSeasonAnimeId]
@@ -1229,8 +1146,8 @@
         document.getElementById('inputCategory').value = item.category;
         updateFormFields();
         document.getElementById('inputTitle').value = item.title;
+        document.getElementById('inputCode').value = item.code || '';
         document.getElementById('inputSeason').value = item.season ? item.season.toString().replace(/\D/g, '') : '';
-        document.getElementById('inputOrientation').value = item.orientation || 'portrait';
 
         if (item.poster) {
             const previewContainer = document.getElementById('posterPreviewContainer');
@@ -1285,7 +1202,9 @@
         let clonedItem = JSON.parse(JSON.stringify(item));
         delete clonedItem.id;
         clonedItem.title += " (Copy)";
-        clonedItem.order = Date.now();
+        let now = Date.now();
+        clonedItem.createdAt = now;
+        clonedItem.order = now;
         await addDoc(collection(db, "animes"), clonedItem);
         await fetchAnimeFromFirebase();
     }
@@ -1293,12 +1212,11 @@
     window.shareCard = function(id) {
         let item = animeData.find(a => a.id === id);
         if(!item) return;
-        let shareText = `Check out ${item.title} ${item.season ? '(' + formatSeasonText(item.season) + ')' : ''}!`;
+        let shareText = `Check out ${item.title} ${item.season ? '(' + formatSeasonText(item.season) + ')' : ''}! ${item.code ? '[Code: ' + item.code + ']' : ''}`;
         if (navigator.share) { navigator.share({ title: item.title, text: shareText }); } 
         else { prompt("Copy details:", shareText); }
     }
 
-    /* Highly Visible Season Jump (Spotlight + Dark Dim Screen + Bouncing Arrow Badge) */
     window.jumpToSeason = function(selectElem, targetId) {
         if (!targetId) return;
         
@@ -1306,23 +1224,18 @@
         let overlay = document.getElementById('spotlightOverlay');
 
         if (cardElement) {
-            // Smoothly scroll target card into center
             cardElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-            // Show Dark Background Dim Effect
             if (overlay) overlay.style.display = 'block';
 
-            // Add High Visibility Spotlight Glow & Scale
             cardElement.classList.add('spotlight-active');
 
-            // Add Animated Pointer Badge Above Card
             let pointerBadge = document.createElement('div');
             pointerBadge.className = 'season-pointer-badge';
             pointerBadge.innerHTML = '👇 TARGET SEASON HERE';
             pointerBadge.id = 'activePointerBadge';
             cardElement.appendChild(pointerBadge);
 
-            // Auto Remove Spotlight & Badge after 2.5 seconds
             setTimeout(() => {
                 cardElement.classList.remove('spotlight-active');
                 if (overlay) overlay.style.display = 'none';
@@ -1336,9 +1249,7 @@
         }
     }
 
-    /* FULLSCREEN DETAIL VIEW FUNCTIONS */
     window.openAnimeDetailModal = function(id, event) {
-        // Prevent opening detail modal when clicking links, dropdowns, or admin controls
         if (event) {
             let target = event.target;
             if (target.closest('.link-btn') || 
@@ -1356,17 +1267,22 @@
         document.getElementById('detailPosterImg').src = item.poster;
         document.getElementById('detailTitle').innerText = item.title;
 
-        // Badges
+        let codeRow = document.getElementById('detailCodeRow');
+        if (item.code) {
+            codeRow.style.display = 'flex';
+            document.getElementById('detailCodeValue').innerText = item.code;
+        } else {
+            codeRow.style.display = 'none';
+        }
+
         let badgesContainer = document.getElementById('detailBadgesContainer');
         badgesContainer.innerHTML = '';
         if (item.isPinned) badgesContainer.innerHTML += `<div class="pin-badge">📌 PINNED</div>`;
         if (item.isNew) badgesContainer.innerHTML += `<div class="new-badge">NEW</div>`;
 
-        // Season
         let seasonVal = item.season ? formatSeasonText(item.season) : 'Season 1';
         document.getElementById('detailSeasonValue').innerText = seasonVal;
 
-        // Episodes, Quality, Size according to Category
         let epRow = document.getElementById('detailEpRow');
         let qualRow = document.getElementById('detailQualityRow');
         let sizeRow = document.getElementById('detailSizeRow');
@@ -1453,9 +1369,10 @@
                 catAnimeList.forEach(item => {
                     let seasonBadgeHTML = item.season ? `<div class="season-badge">${formatSeasonText(item.season)}</div>` : '';
                     let epStr = formatEpText(item.episodes || item.totalEp);
-                    let orientationClass = item.orientation === 'landscape' ? 'card-landscape' : 'card-portrait';
+                    let orientationClass = 'card-portrait';
                     let pinnedClass = item.isPinned ? 'pinned-card' : '';
                     
+                    let codeBadgeHTML = item.code ? `<div class="code-badge">${item.code}</div>` : '';
                     let pinBadgeHTML = item.isPinned ? `<div class="pin-badge">📌 PINNED</div>` : '';
                     let newBadgeHTML = item.isNew ? `<div class="new-badge">NEW</div>` : '';
 
@@ -1506,14 +1423,16 @@
                         <div class="badges-container">
                             ${pinBadgeHTML}
                             ${newBadgeHTML}
-                        </div>`;
+                        </div>
+                        ${codeBadgeHTML}`;
 
                     if (isAdmin) {
                         let pinBtnText = item.isPinned ? '📍 Unpin' : '📌 Pin to Top';
                         let newBtnText = item.isNew ? '⚪ Turn NEW Off' : '🟢 Turn NEW On';
+                        let menuClass = item.code ? 'card-menu-container has-code' : 'card-menu-container';
                         
                         cardHTML += `
-                            <div class="card-menu-container" style="display: block;">
+                            <div class="${menuClass}" style="display: block;">
                                 <button class="dots-btn" onclick="toggleCardMenu('${item.id}', event)">⋮</button>
                                 <div id="menu-${item.id}" class="dropdown-menu">
                                     <button onclick="togglePinCard('${item.id}')" style="color: #f59e0b; font-weight: bold;">${pinBtnText}</button>
@@ -1592,19 +1511,25 @@
         let sortOption = document.getElementById('sortOption').value;
 
         let filtered = animeData.filter(item => {
-            let matchesSearch = item.title.toLowerCase().includes(query) || (item.season && item.season.toString().toLowerCase().includes(query));
+            let matchesSearch = item.title.toLowerCase().includes(query) || 
+                                (item.code && item.code.toLowerCase().includes(query)) ||
+                                (item.season && item.season.toString().toLowerCase().includes(query));
             let matchesCat = (selectedCategory === 'all' || item.category === selectedCategory);
             return matchesSearch && matchesCat;
         });
 
-        if (sortOption === 'high-low') {
+        // Ensure Latest added card stays at the top
+        if (sortOption === 'newest') {
+            filtered.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        } else if (sortOption === 'oldest') {
+            filtered.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+        } else if (sortOption === 'high-low') {
             filtered.sort((a, b) => (b.totalEp || parseInt(b.episodes) || 0) - (a.totalEp || parseInt(a.episodes) || 0));
         } else if (sortOption === 'low-high') {
             filtered.sort((a, b) => (a.totalEp || parseInt(a.episodes) || 0) - (b.totalEp || parseInt(b.episodes) || 0));
-        } else if (sortOption === 'custom') {
-            filtered.sort((a, b) => a.order - b.order);
         }
 
+        // Pinned cards stay on top
         filtered.sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0));
 
         renderCards(filtered);
