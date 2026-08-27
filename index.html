@@ -64,13 +64,10 @@
             100% { opacity: 0.4; }
         }
 
-        /* Badge Styles */
-        .badges-container { position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 6px; z-index: 10; }
+        /* Badge Styles - Yahan Anime Code ko New badge ke theek neeche rakhne ke liye ek hi container me dala gaya hai */
+        .badges-container { position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 6px; z-index: 10; align-items: flex-start; }
         .pin-badge { background: #f59e0b; color: #000; font-size: 0.85rem; font-weight: 800; padding: 4px 10px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.6); }
         .new-badge { background: #22c55e; color: #000; font-size: 0.85rem; font-weight: 800; padding: 4px 10px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.6); animation: pulseGreen 2s infinite alternate; }
-        
-        /* Anime Code Badge Styles (Opposite to NEW badge / Top Right area) */
-        .code-badge-container { position: absolute; top: 10px; right: 10px; z-index: 10; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
         .anime-code-badge { background: #38bdf8; color: #0f172a; font-size: 0.85rem; font-weight: 800; padding: 4px 10px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.6); }
 
         @keyframes pulseGreen { from { opacity: 1; } to { opacity: 0.7; } }
@@ -1537,8 +1534,6 @@
                         <div class="badges-container">
                             ${pinBadgeHTML}
                             ${newBadgeHTML}
-                        </div>
-                        <div class="code-badge-container">
                             ${codeBadgeHTML}
                         </div>`;
 
@@ -1635,7 +1630,7 @@
         });
 
         if (sortOption === 'high-low') {
-            filtered.sort((a, b) => (b.totalEp || parseInt(b.episodes) || 0) - (a.totalEp || parseInt(b.episodes) || 0));
+            filtered.sort((a, b) => (b.totalEp || parseInt(b.episodes) || 0) - (a.totalEp || parseInt(a.episodes) || 0));
         } else if (sortOption === 'low-high') {
             filtered.sort((a, b) => (a.totalEp || parseInt(a.episodes) || 0) - (b.totalEp || parseInt(b.episodes) || 0));
         } else if (sortOption === 'custom') {
