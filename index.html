@@ -69,6 +69,10 @@
         .pin-badge { background: #f59e0b; color: #000; font-size: 0.85rem; font-weight: 800; padding: 4px 10px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.6); }
         .new-badge { background: #22c55e; color: #000; font-size: 0.85rem; font-weight: 800; padding: 4px 10px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.6); animation: pulseGreen 2s infinite alternate; }
         
+        /* Anime Code Badge Styles (Opposite to NEW badge / Top Right area) */
+        .code-badge-container { position: absolute; top: 10px; right: 10px; z-index: 10; display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+        .anime-code-badge { background: #38bdf8; color: #0f172a; font-size: 0.85rem; font-weight: 800; padding: 4px 10px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.6); }
+
         @keyframes pulseGreen { from { opacity: 1; } to { opacity: 0.7; } }
         .anime-card.pinned-card { border: 2px solid #f59e0b; }
 
@@ -115,9 +119,9 @@
             100% { transform: translate(-50%, -10px); }
         }
 
-        .card-menu-container { position: absolute; top: 10px; right: 10px; z-index: 10; display: none; }
+        .card-menu-container { position: absolute; top: 10px; right: 10px; z-index: 15; display: none; }
         .dots-btn { background: rgba(0,0,0,0.85); color: #fff; border: 1px solid #334155; padding: 6px 12px; border-radius: 18px; cursor: pointer; font-size: 1.1rem; font-weight: bold; }
-        .dropdown-menu { display: none; position: absolute; right: 0; top: 35px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.8); width: 190px; overflow: hidden; z-index: 20; }
+        .dropdown-menu { display: none; position: absolute; right: 0; top: 35px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.8); width: 190px; overflow: hidden; z-index: 25; }
         .dropdown-menu button { width: 100%; background: none; border: none; color: #fff; padding: 10px 14px; text-align: left; cursor: pointer; font-size: 0.9rem; border-bottom: 1px solid #1e293b; }
         .dropdown-menu button:hover { background: #f97316; color: #fff; }
 
@@ -326,6 +330,7 @@
         </select>
         
         <input type="text" id="inputTitle" placeholder="Anime Title">
+        <input type="text" id="inputAnimeCode" placeholder="Anime Code (e.g. #001, A-12)">
         <input type="number" id="inputSeason" placeholder="Season Number (e.g., 1, 2)">
 
         <label style="font-size: 0.85rem; color: #38bdf8; display: block; margin-bottom: 5px;">Select Poster Orientation:</label>
@@ -349,10 +354,11 @@
 
     <h2 style="text-align: center; color: #f97316; text-transform: uppercase;">⚡ Premium Anime Hub ⚡</h2>
 
+    <!-- Toolbar: Search -> Category -> Add-on (New to Old / Old to New) -> Sort By -->
     <div class="filter-toolbar">
         <div class="filter-group">
             <label>SEARCH ANIME:</label>
-            <input type="text" id="searchBox" placeholder="Search by name..." oninput="filterAndSort()">
+            <input type="text" id="searchBox" placeholder="Search by name or code..." oninput="filterAndSort()">
         </div>
         <div class="filter-group">
             <label>CATEGORY:</label>
@@ -363,6 +369,14 @@
                 <option value="ongoing">Ongoing</option>
                 <option value="watching">Currently Watching</option>
                 <option value="completed">Watched List</option>
+            </select>
+        </div>
+        <!-- Newly Added Feature Section Between Category & Sort By -->
+        <div class="filter-group">
+            <label>ADD-ON ORDER:</label>
+            <select id="addOrderOption" onchange="filterAndSort()">
+                <option value="new-to-old">New to Old (Latest First)</option>
+                <option value="old-to-new">Old to New (Oldest First)</option>
             </select>
         </div>
         <div class="filter-group">
@@ -492,7 +506,10 @@
             </div>
             
             <div class="detail-content">
-                <div style="display: flex; gap: 8px; margin-bottom: 10px;" id="detailBadgesContainer"></div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div style="display: flex; gap: 8px;" id="detailBadgesContainer"></div>
+                    <div id="detailCodeContainer"></div>
+                </div>
                 <h2 id="detailTitle" class="detail-title">Anime Title</h2>
                 
                 <div class="detail-meta-group">
@@ -650,6 +667,7 @@
                 if (item.isNew === undefined) item.isNew = false;
                 if (!item.orientation) item.orientation = 'portrait';
                 if (!item.manualLinkedIds) item.manualLinkedIds = [];
+                if (!item.animeCode) item.animeCode = '';
                 animeData.push(item);
             });
             animeData.sort((a, b) => a.order - b.order);
@@ -798,6 +816,7 @@
     window.addAnimeCard = function() {
         const category = document.getElementById('inputCategory').value;
         const title = document.getElementById('inputTitle').value;
+        const animeCode = document.getElementById('inputAnimeCode').value;
         const season = document.getElementById('inputSeason').value;
         const orientation = document.getElementById('inputOrientation').value;
 
@@ -816,15 +835,23 @@
         }
 
         let existingItem = editingId !== null ? animeData.find(item => item.id === editingId) : null;
-        let orderVal = existingItem ? existingItem.order : Date.now();
+        
+        let orderVal;
+        if (existingItem) {
+            orderVal = existingItem.order;
+        } else {
+            let minOrder = animeData.length > 0 ? Math.min(...animeData.map(a => a.order || Date.now())) : Date.now();
+            orderVal = minOrder - 1;
+        }
+
         let pinVal = existingItem ? (existingItem.isPinned || false) : false;
         let newVal = existingItem ? (existingItem.isNew || false) : true;
 
-        processCardCreation(category, title, season, orientation, posterToUse, orderVal, pinVal, newVal);
+        processCardCreation(category, title, animeCode, season, orientation, posterToUse, orderVal, pinVal, newVal);
     }
 
-    async function processCardCreation(category, title, season, orientation, poster, orderVal, isPinned = false, isNew = true) {
-        let newCard = { category, title, season: season || '', orientation, poster, order: orderVal !== undefined ? orderVal : Date.now(), isPinned: isPinned, isNew: isNew, manualLinkedIds: [] };
+    async function processCardCreation(category, title, animeCode, season, orientation, poster, orderVal, isPinned = false, isNew = true) {
+        let newCard = { category, title, animeCode: animeCode || '', season: season || '', orientation, poster, order: orderVal !== undefined ? orderVal : Date.now(), isPinned: isPinned, isNew: isNew, manualLinkedIds: [] };
         fillCardDataFromForm(newCard, category, "input");
 
         try {
@@ -879,6 +906,7 @@
         document.getElementById('saveCardBtn').innerText = "Add Anime Card to List";
         document.getElementById('cancelEditBtn').style.display = 'none';
         document.getElementById('inputTitle').value = '';
+        document.getElementById('inputAnimeCode').value = '';
         document.getElementById('inputSeason').value = '';
         document.getElementById('inputOrientation').value = 'portrait';
         document.getElementById('inputPosterFile').value = '';
@@ -1052,6 +1080,7 @@
         
         let updatedCard = {
             title: item.title,
+            animeCode: item.animeCode || '',
             season: item.season || '',
             orientation: item.orientation || 'portrait',
             poster: item.poster,
@@ -1155,13 +1184,16 @@
         let parentAnime = animeData.find(a => a.id === activeSeasonAnimeId);
         if (!parentAnime) return;
 
+        let minOrder = animeData.length > 0 ? Math.min(...animeData.map(a => a.order || Date.now())) : Date.now();
+
         let newCard = {
             title: parentAnime.title,
+            animeCode: parentAnime.animeCode || '',
             season: seasonNum,
             orientation: parentAnime.orientation || 'portrait',
             poster: parentAnime.poster,
             category: parentAnime.category,
-            order: Date.now(),
+            order: minOrder - 1,
             isPinned: false,
             isNew: true,
             manualLinkedIds: [activeSeasonAnimeId]
@@ -1176,7 +1208,7 @@
             document.getElementById('quickSeasonNum').value = '';
             await fetchAnimeFromFirebase();
             renderSeasonsManager();
-            alert(`Season ${seasonNum} added & linked successfully!`);
+            alert(`Season ${seasonNum} added successfully & linked!`);
         } catch (err) {
             console.error(err);
             alert("Error adding quick season!");
@@ -1229,6 +1261,7 @@
         document.getElementById('inputCategory').value = item.category;
         updateFormFields();
         document.getElementById('inputTitle').value = item.title;
+        document.getElementById('inputAnimeCode').value = item.animeCode || '';
         document.getElementById('inputSeason').value = item.season ? item.season.toString().replace(/\D/g, '') : '';
         document.getElementById('inputOrientation').value = item.orientation || 'portrait';
 
@@ -1285,7 +1318,8 @@
         let clonedItem = JSON.parse(JSON.stringify(item));
         delete clonedItem.id;
         clonedItem.title += " (Copy)";
-        clonedItem.order = Date.now();
+        let minOrder = animeData.length > 0 ? Math.min(...animeData.map(a => a.order || Date.now())) : Date.now();
+        clonedItem.order = minOrder - 1;
         await addDoc(collection(db, "animes"), clonedItem);
         await fetchAnimeFromFirebase();
     }
@@ -1298,7 +1332,7 @@
         else { prompt("Copy details:", shareText); }
     }
 
-    /* Highly Visible Season Jump (Spotlight + Dark Dim Screen + Bouncing Arrow Badge) */
+    /* Highly Visible Season Jump */
     window.jumpToSeason = function(selectElem, targetId) {
         if (!targetId) return;
         
@@ -1306,23 +1340,18 @@
         let overlay = document.getElementById('spotlightOverlay');
 
         if (cardElement) {
-            // Smoothly scroll target card into center
             cardElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-            // Show Dark Background Dim Effect
             if (overlay) overlay.style.display = 'block';
 
-            // Add High Visibility Spotlight Glow & Scale
             cardElement.classList.add('spotlight-active');
 
-            // Add Animated Pointer Badge Above Card
             let pointerBadge = document.createElement('div');
             pointerBadge.className = 'season-pointer-badge';
             pointerBadge.innerHTML = '👇 TARGET SEASON HERE';
             pointerBadge.id = 'activePointerBadge';
             cardElement.appendChild(pointerBadge);
 
-            // Auto Remove Spotlight & Badge after 2.5 seconds
             setTimeout(() => {
                 cardElement.classList.remove('spotlight-active');
                 if (overlay) overlay.style.display = 'none';
@@ -1338,7 +1367,6 @@
 
     /* FULLSCREEN DETAIL VIEW FUNCTIONS */
     window.openAnimeDetailModal = function(id, event) {
-        // Prevent opening detail modal when clicking links, dropdowns, or admin controls
         if (event) {
             let target = event.target;
             if (target.closest('.link-btn') || 
@@ -1356,17 +1384,19 @@
         document.getElementById('detailPosterImg').src = item.poster;
         document.getElementById('detailTitle').innerText = item.title;
 
-        // Badges
         let badgesContainer = document.getElementById('detailBadgesContainer');
+        let codeContainer = document.getElementById('detailCodeContainer');
+        
         badgesContainer.innerHTML = '';
+        codeContainer.innerHTML = '';
+
         if (item.isPinned) badgesContainer.innerHTML += `<div class="pin-badge">📌 PINNED</div>`;
         if (item.isNew) badgesContainer.innerHTML += `<div class="new-badge">NEW</div>`;
+        if (item.animeCode) codeContainer.innerHTML = `<div class="anime-code-badge">${item.animeCode}</div>`;
 
-        // Season
         let seasonVal = item.season ? formatSeasonText(item.season) : 'Season 1';
         document.getElementById('detailSeasonValue').innerText = seasonVal;
 
-        // Episodes, Quality, Size according to Category
         let epRow = document.getElementById('detailEpRow');
         let qualRow = document.getElementById('detailQualityRow');
         let sizeRow = document.getElementById('detailSizeRow');
@@ -1458,6 +1488,7 @@
                     
                     let pinBadgeHTML = item.isPinned ? `<div class="pin-badge">📌 PINNED</div>` : '';
                     let newBadgeHTML = item.isNew ? `<div class="new-badge">NEW</div>` : '';
+                    let codeBadgeHTML = item.animeCode ? `<div class="anime-code-badge">${item.animeCode}</div>` : '';
 
                     let relatedSeasons = animeData.filter(a => 
                         a.id !== item.id && 
@@ -1506,6 +1537,9 @@
                         <div class="badges-container">
                             ${pinBadgeHTML}
                             ${newBadgeHTML}
+                        </div>
+                        <div class="code-badge-container">
+                            ${codeBadgeHTML}
                         </div>`;
 
                     if (isAdmin) {
@@ -1589,20 +1623,27 @@
     window.filterAndSort = function() {
         let query = document.getElementById('searchBox').value.toLowerCase();
         let selectedCategory = document.getElementById('filterCategory').value;
+        let addOrderOption = document.getElementById('addOrderOption').value;
         let sortOption = document.getElementById('sortOption').value;
 
         let filtered = animeData.filter(item => {
-            let matchesSearch = item.title.toLowerCase().includes(query) || (item.season && item.season.toString().toLowerCase().includes(query));
+            let matchesSearch = item.title.toLowerCase().includes(query) || 
+                                (item.season && item.season.toString().toLowerCase().includes(query)) ||
+                                (item.animeCode && item.animeCode.toLowerCase().includes(query));
             let matchesCat = (selectedCategory === 'all' || item.category === selectedCategory);
             return matchesSearch && matchesCat;
         });
 
         if (sortOption === 'high-low') {
-            filtered.sort((a, b) => (b.totalEp || parseInt(b.episodes) || 0) - (a.totalEp || parseInt(a.episodes) || 0));
+            filtered.sort((a, b) => (b.totalEp || parseInt(b.episodes) || 0) - (a.totalEp || parseInt(b.episodes) || 0));
         } else if (sortOption === 'low-high') {
             filtered.sort((a, b) => (a.totalEp || parseInt(a.episodes) || 0) - (b.totalEp || parseInt(b.episodes) || 0));
         } else if (sortOption === 'custom') {
-            filtered.sort((a, b) => a.order - b.order);
+            if (addOrderOption === 'new-to-old') {
+                filtered.sort((a, b) => a.order - b.order);
+            } else {
+                filtered.sort((a, b) => b.order - a.order);
+            }
         }
 
         filtered.sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0));
@@ -1612,4 +1653,4 @@
 </script>
 
 </body>
-                </html>
+</html>
