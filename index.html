@@ -20,7 +20,7 @@
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; }
         .modal-content { background: #1e293b; padding: 20px; border-radius: 10px; width: 90%; max-width: 550px; border: 1px solid #38bdf8; max-height: 90vh; overflow-y: auto; }
         
-        input, select { width: 100%; padding: 10px; margin-bottom: 10px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 4px; box-sizing: border-box; }
+        input, select, textarea { width: 100%; padding: 10px; margin-bottom: 10px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 4px; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         input[type="file"] { padding: 7px; cursor: pointer; background: #0f172a; }
         .action-btn { width: 100%; padding: 10px; background: #38bdf8; color: #0f172a; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 5px; }
         .close-btn { background: #64748b; color: white; margin-top: 5px; }
@@ -133,6 +133,9 @@
         .anime-title { color: #fff; font-size: 1.25rem; font-weight: 800; margin: 0 0 8px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.3px; }
         
         .season-badge { display: inline-block; background: #f97316; color: #ffffff; font-size: 0.95rem; font-weight: 900; padding: 4px 10px; border-radius: 5px; text-transform: uppercase; margin-bottom: 8px; align-self: flex-start; letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
+
+        /* Anime Card Note Section Styling */
+        .anime-card-note { background: #1a233a; border-left: 3px solid #f97316; padding: 6px 8px; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1; margin-bottom: 8px; word-break: break-word; }
 
         .other-seasons-select { width: 100%; background: #0f172a; color: #38bdf8; border: 1.5px solid #38bdf8; font-size: 0.95rem; font-weight: bold; padding: 8px 6px; border-radius: 6px; margin-bottom: 8px; cursor: pointer; text-align: center; }
 
@@ -345,6 +348,9 @@
 
         <input type="text" id="inputAnimeCode" placeholder="Anime Code (e.g. #001, A-12)">
 
+        <!-- Note Field Added in Add Panel -->
+        <textarea id="inputNote" placeholder="Anime Note (Optional)..." rows="2"></textarea>
+
         <div id="seasonContainer">
             <input type="number" id="inputSeason" placeholder="Season Number (e.g., 1, 2)">
         </div>
@@ -486,6 +492,73 @@
         
         <button class="action-btn" onclick="submitMoveCard()">Confirm Move & Save</button>
         <button class="action-btn close-btn" onclick="closeMoveModal()">Cancel</button>
+    </div>
+</div>
+
+<!-- Full Edit Modal to update Title, Type, OVA Type, Code, Note, Season, Part, Orientation, Links, and Total Episodes -->
+<div id="editModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+        <h3 style="color: #f97316; margin-top:0;">Edit Anime Info</h3>
+        
+        <label style="font-size: 0.85rem; color: #38bdf8;">Anime Title:</label>
+        <input type="text" id="modalEditTitle" placeholder="Anime Title">
+
+        <label style="font-size: 0.85rem; color: #ec4899; font-weight: bold;">Anime Type (Format):</label>
+        <select id="modalEditAnimeType" onchange="handleModalEditTypeChange()">
+            <option value="series">📺 Anime Series</option>
+            <option value="movie">🎬 Anime Movie</option>
+            <option value="ova">💿 OVA</option>
+            <option value="special">✨ Special</option>
+        </select>
+
+        <div id="modalEditOvaContainer" style="display: none; margin-bottom: 10px;">
+            <label style="font-size: 0.85rem; color: #8b5cf6; font-weight: bold;">OVA Type:</label>
+            <select id="modalEditOvaType">
+                <option value="episodes">Multi-Episodes OVA</option>
+                <option value="duration">Single / Duration-based OVA</option>
+            </select>
+        </div>
+
+        <div id="modalEditSeasonContainer">
+            <label style="font-size: 0.85rem; color: #38bdf8;">Season Number / Info:</label>
+            <input type="text" id="modalEditSeason" placeholder="Season (e.g. 1)">
+        </div>
+
+        <div id="modalEditPartContainer" style="display: none;">
+            <label style="font-size: 0.85rem; color: #38bdf8;">Part Number:</label>
+            <input type="number" id="modalEditPart" placeholder="Part Number (e.g. 1, 2)">
+        </div>
+
+        <!-- Newly added edit fields for Total Episodes and Download/Stream Links -->
+        <label style="font-size: 0.85rem; color: #38bdf8;">Total Episodes / Duration:</label>
+        <input type="text" id="modalEditEpisodes" placeholder="Total Episodes / Duration">
+
+        <label style="font-size: 0.85rem; color: #38bdf8;">FilePress Link:</label>
+        <input type="text" id="modalEditFilepress" placeholder="FilePress Link">
+
+        <label style="font-size: 0.85rem; color: #38bdf8;">AppDrive Link:</label>
+        <input type="text" id="modalEditAppdrive" placeholder="AppDrive Link">
+
+        <label style="font-size: 0.85rem; color: #38bdf8;">HubCloud Link:</label>
+        <input type="text" id="modalEditHubcloud" placeholder="HubCloud Link">
+
+        <label style="font-size: 0.85rem; color: #38bdf8;">Direct / Custom Link:</label>
+        <input type="text" id="modalEditLink" placeholder="Direct Link">
+
+        <label style="font-size: 0.85rem; color: #38bdf8;">Note:</label>
+        <textarea id="modalEditNote" placeholder="Add Note..." rows="2"></textarea>
+
+        <label style="font-size: 0.85rem; color: #38bdf8;">Anime Code:</label>
+        <input type="text" id="modalEditCode" placeholder="Anime Code">
+
+        <label style="font-size: 0.85rem; color: #38bdf8;">Poster Orientation:</label>
+        <select id="modalEditOrientation">
+            <option value="portrait">Portrait (Vertical / Tall Poster)</option>
+            <option value="landscape">Landscape (Horizontal / Wide Poster)</option>
+        </select>
+
+        <button class="action-btn" onclick="saveModalEdit()">Save Changes</button>
+        <button class="action-btn close-btn" onclick="closeEditModal()">Cancel</button>
     </div>
 </div>
 
@@ -686,6 +759,7 @@
                 if (!item.orientation) item.orientation = 'portrait';
                 if (!item.manualLinkedIds) item.manualLinkedIds = [];
                 if (!item.animeCode) item.animeCode = '';
+                if (!item.note) item.note = '';
                 if (!item.animeType) item.animeType = 'series';
                 if (!item.part) item.part = '';
                 if (!item.ovaType) item.ovaType = 'episodes';
@@ -894,6 +968,7 @@
         const animeType = document.getElementById('inputAnimeType').value;
         const ovaType = document.getElementById('inputOvaType') ? document.getElementById('inputOvaType').value : 'episodes';
         const animeCode = document.getElementById('inputAnimeCode').value;
+        const note = document.getElementById('inputNote').value;
         const season = document.getElementById('inputSeason').value;
         const part = document.getElementById('inputPart').value;
         const orientation = document.getElementById('inputOrientation').value;
@@ -902,39 +977,25 @@
 
         let posterToUse = croppedBase64Data;
 
-        if (editingId !== null && !posterToUse) {
-            let existingItem = animeData.find(item => item.id === editingId);
-            posterToUse = existingItem ? existingItem.poster : null;
-        }
-
         if (!posterToUse) {
             alert('Please select and crop a poster image.');
             return;
         }
 
-        let existingItem = editingId !== null ? animeData.find(item => item.id === editingId) : null;
-        
-        let orderVal;
-        if (existingItem) {
-            orderVal = existingItem.order;
-        } else {
-            let minOrder = animeData.length > 0 ? Math.min(...animeData.map(a => a.order || Date.now())) : Date.now();
-            orderVal = minOrder - 1;
-        }
+        let minOrder = animeData.length > 0 ? Math.min(...animeData.map(a => a.order || Date.now())) : Date.now();
+        let orderVal = minOrder - 1;
 
-        let pinVal = existingItem ? (existingItem.isPinned || false) : false;
-        let newVal = existingItem ? (existingItem.isNew || false) : true;
-
-        processCardCreation(category, title, animeType, ovaType, animeCode, season, part, orientation, posterToUse, orderVal, pinVal, newVal);
+        processCardCreation(category, title, animeType, ovaType, animeCode, note, season, part, orientation, posterToUse, orderVal, false, true);
     }
 
-    async function processCardCreation(category, title, animeType, ovaType, animeCode, season, part, orientation, poster, orderVal, isPinned = false, isNew = true) {
+    async function processCardCreation(category, title, animeType, ovaType, animeCode, note, season, part, orientation, poster, orderVal, isPinned = false, isNew = true) {
         let newCard = { 
             category, 
             title, 
             animeType: animeType || 'series', 
             ovaType: ovaType || 'episodes',
             animeCode: animeCode || '', 
+            note: note || '',
             season: season || '', 
             part: part || '',
             orientation, 
@@ -947,13 +1008,8 @@
         fillCardDataFromForm(newCard, category, "input");
 
         try {
-            if (editingId !== null) {
-                await updateDoc(doc(db, "animes", editingId), newCard);
-                alert('Anime updated successfully!');
-            } else {
-                await addDoc(collection(db, "animes"), newCard);
-                alert('Anime added successfully with NEW badge!');
-            }
+            await addDoc(collection(db, "animes"), newCard);
+            alert('Anime added successfully with NEW badge!');
             resetForm();
             await fetchAnimeFromFirebase();
         } catch (error) {
@@ -1000,6 +1056,7 @@
         document.getElementById('inputAnimeType').value = 'series';
         document.getElementById('inputOvaType').value = 'episodes';
         document.getElementById('inputAnimeCode').value = '';
+        document.getElementById('inputNote').value = '';
         document.getElementById('inputSeason').value = '';
         document.getElementById('inputPart').value = '';
         document.getElementById('inputOrientation').value = 'portrait';
@@ -1179,6 +1236,7 @@
             animeType: item.animeType || 'series',
             ovaType: item.ovaType || 'episodes',
             animeCode: item.animeCode || '',
+            note: item.note || '',
             season: item.season || '',
             part: item.part || '',
             orientation: item.orientation || 'portrait',
@@ -1200,6 +1258,108 @@
         } catch (error) {
             console.error("Move error:", error);
             alert("Error moving card!");
+        }
+    }
+
+    window.handleModalEditTypeChange = function() {
+        let type = document.getElementById('modalEditAnimeType').value;
+        let seasonCont = document.getElementById('modalEditSeasonContainer');
+        let partCont = document.getElementById('modalEditPartContainer');
+        let ovaCont = document.getElementById('modalEditOvaContainer');
+
+        if (type === 'movie') {
+            seasonCont.style.display = 'none';
+            partCont.style.display = 'block';
+            ovaCont.style.display = 'none';
+        } else if (type === 'ova') {
+            seasonCont.style.display = 'block';
+            partCont.style.display = 'none';
+            ovaCont.style.display = 'block';
+        } else {
+            seasonCont.style.display = 'block';
+            partCont.style.display = 'none';
+            ovaCont.style.display = 'none';
+        }
+    }
+
+    window.openEditModal = function(id) {
+        let item = animeData.find(a => a.id === id);
+        if (!item) return;
+        editingId = item.id;
+        
+        document.getElementById('modalEditTitle').value = item.title || '';
+        document.getElementById('modalEditAnimeType').value = item.animeType || 'series';
+        document.getElementById('modalEditOvaType').value = item.ovaType || 'episodes';
+        document.getElementById('modalEditSeason').value = item.season || '';
+        document.getElementById('modalEditPart').value = item.part || '';
+        document.getElementById('modalEditEpisodes').value = item.episodes || item.totalEp || '';
+        document.getElementById('modalEditFilepress').value = item.filepress || '';
+        document.getElementById('modalEditAppdrive').value = item.appdrive || '';
+        document.getElementById('modalEditHubcloud').value = item.hubcloud || '';
+        document.getElementById('modalEditLink').value = item.link || '';
+        document.getElementById('modalEditNote').value = item.note || '';
+        document.getElementById('modalEditCode').value = item.animeCode || '';
+        document.getElementById('modalEditOrientation').value = item.orientation || 'portrait';
+        
+        handleModalEditTypeChange();
+        document.getElementById('editModal').style.display = 'flex';
+    }
+
+    window.closeEditModal = function() {
+        document.getElementById('editModal').style.display = 'none';
+        editingId = null;
+    }
+
+    window.saveModalEdit = async function() {
+        if (editingId === null) return;
+        let newTitle = document.getElementById('modalEditTitle').value;
+        let newAnimeType = document.getElementById('modalEditAnimeType').value;
+        let newOvaType = document.getElementById('modalEditOvaType').value;
+        let newSeason = document.getElementById('modalEditSeason').value;
+        let newPart = document.getElementById('modalEditPart').value;
+        let newEpisodes = document.getElementById('modalEditEpisodes').value;
+        let newFilepress = document.getElementById('modalEditFilepress').value;
+        let newAppdrive = document.getElementById('modalEditAppdrive').value;
+        let newHubcloud = document.getElementById('modalEditHubcloud').value;
+        let newLink = document.getElementById('modalEditLink').value;
+        let newNote = document.getElementById('modalEditNote').value;
+        let newCode = document.getElementById('modalEditCode').value;
+        let newOrientation = document.getElementById('modalEditOrientation').value;
+
+        if (!newTitle) {
+            alert("Title cannot be empty!");
+            return;
+        }
+
+        let currentItem = animeData.find(a => a.id === editingId);
+        let updatePayload = {
+            title: newTitle,
+            animeType: newAnimeType,
+            ovaType: newOvaType,
+            season: newSeason,
+            part: newPart,
+            episodes: newEpisodes,
+            filepress: newFilepress,
+            appdrive: newAppdrive,
+            hubcloud: newHubcloud,
+            link: newLink,
+            note: newNote,
+            animeCode: newCode,
+            orientation: newOrientation
+        };
+
+        if (currentItem && currentItem.category === 'watching' || currentItem && currentItem.category === 'completed') {
+            updatePayload.totalEp = newEpisodes;
+        }
+
+        try {
+            await updateDoc(doc(db, "animes", editingId), updatePayload);
+            alert("Anime Info, Links & Episodes Updated Successfully!");
+            closeEditModal();
+            await fetchAnimeFromFirebase();
+        } catch (err) {
+            console.error(err);
+            alert("Error updating info!");
         }
     }
 
@@ -1373,6 +1533,7 @@
             animeType: parentAnime.animeType || 'series',
             ovaType: parentAnime.ovaType || 'episodes',
             animeCode: parentAnime.animeCode || '',
+            note: parentAnime.note || '',
             season: seasonNum,
             part: '',
             orientation: parentAnime.orientation || 'portrait',
@@ -1401,59 +1562,7 @@
     }
 
     window.editCard = function(id) {
-        let item = animeData.find(a => a.id === id);
-        if(!item) return;
-        editingId = item.id;
-        document.getElementById('panelTitle').innerText = "Edit Anime Card / Update Poster";
-        document.getElementById('saveCardBtn').innerText = "Save Changes";
-        document.getElementById('cancelEditBtn').style.display = 'block';
-        document.getElementById('inputCategory').value = item.category;
-        document.getElementById('inputAnimeType').value = item.animeType || 'series';
-        document.getElementById('inputOvaType').value = item.ovaType || 'episodes';
-        handleTypeChange();
-        
-        document.getElementById('inputTitle').value = item.title;
-        document.getElementById('inputAnimeCode').value = item.animeCode || '';
-        document.getElementById('inputSeason').value = item.season ? item.season.toString().replace(/\D/g, '') : '';
-        document.getElementById('inputPart').value = item.part || '';
-        document.getElementById('inputOrientation').value = item.orientation || 'portrait';
-
-        if (item.poster) {
-            const previewContainer = document.getElementById('posterPreviewContainer');
-            const previewImg = document.getElementById('posterPreviewImg');
-            previewImg.src = item.poster;
-            previewContainer.style.display = 'flex';
-        }
-
-        setTimeout(() => {
-            if (item.category === 'download') {
-                document.getElementById('inputEpisodes').value = item.episodes || '';
-                document.getElementById('inputQuality').value = item.quality || '';
-                document.getElementById('inputSize').value = item.size || '';
-                document.getElementById('inputFilepress').value = item.filepress || '';
-                document.getElementById('inputAppdrive').value = item.appdrive || '';
-                document.getElementById('inputHubcloud').value = item.hubcloud || '';
-                document.getElementById('inputLink').value = item.link || '';
-            } else if (item.category === 'downloaded') {
-                document.getElementById('inputUsbDrive').value = item.usbDrive || 'Flash 32GB USB';
-                document.getElementById('inputEpisodes').value = item.episodes || '';
-                document.getElementById('inputQuality').value = item.quality || '';
-                document.getElementById('inputSize').value = item.size || '';
-            } else if (item.category === 'ongoing') {
-                document.getElementById('inputEpisodes').value = item.episodes || '';
-                document.getElementById('inputLink').value = item.link || '';
-            } else if (item.category === 'watching') {
-                document.getElementById('inputTotalEp').value = item.totalEp || '';
-                document.getElementById('inputWatchedEp').value = item.watchedEp || '';
-                document.getElementById('inputLastWatched').value = item.lastWatched || '';
-            } else if (item.category === 'completed') {
-                document.getElementById('inputTotalEp').value = item.totalEp || '';
-                document.getElementById('inputRating').value = item.rating || '';
-                document.getElementById('inputWatchYear').value = item.watchYear || '';
-            }
-        }, 50);
-
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        openEditModal(id);
     }
 
     window.deleteCard = async function(id) {
@@ -1607,6 +1716,61 @@
         document.getElementById('animeDetailModal').style.display = 'none';
     }
 
+    function parseSizeInMB(sizeStr) {
+        if (!sizeStr) return 0;
+        let str = sizeStr.toString().trim().toUpperCase();
+        let match = str.match(/([\d.]+)\s*(GB|MB|KB)?/);
+        if (!match) return 0;
+        let val = parseFloat(match[1]) || 0;
+        let unit = match[2] || 'MB';
+        if (unit === 'GB') return val * 1024;
+        if (unit === 'KB') return val / 1024;
+        return val;
+    }
+
+    window.filterAndSort = function() {
+        let searchQuery = document.getElementById('searchBox').value.trim().toLowerCase();
+        let selectedCategory = document.getElementById('filterCategory').value;
+        let selectedType = document.getElementById('filterType').value;
+        let addOrder = document.getElementById('addOrderOption').value;
+        let sortOption = document.getElementById('sortOption').value;
+
+        let filtered = animeData.filter(item => {
+            let matchesSearch = !searchQuery || 
+                (item.title && item.title.toLowerCase().includes(searchQuery)) || 
+                (item.animeCode && item.animeCode.toLowerCase().includes(searchQuery));
+            
+            let matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+            let matchesType = selectedType === 'all' || (item.animeType || 'series') === selectedType;
+
+            return matchesSearch && matchesCategory && matchesType;
+        });
+
+        filtered.sort((a, b) => {
+            if (a.isPinned !== b.isPinned) {
+                return a.isPinned ? -1 : 1;
+            }
+
+            if (sortOption === 'high-low') {
+                let sizeA = parseSizeInMB(a.size);
+                let sizeB = parseSizeInMB(b.size);
+                if (sizeA !== sizeB) return sizeB - sizeA;
+            } else if (sortOption === 'low-high') {
+                let sizeA = parseSizeInMB(a.size);
+                let sizeB = parseSizeInMB(b.size);
+                if (sizeA !== sizeB) return sizeA - sizeB;
+            }
+
+            if (addOrder === 'old-to-new') {
+                return (b.order || 0) - (a.order || 0);
+            } else {
+                return (a.order || 0) - (b.order || 0);
+            }
+        });
+
+        renderCards(filtered);
+    }
+
     function renderCards(data) {
         const container = document.getElementById('animeSectionsContainer');
         container.innerHTML = '';
@@ -1636,6 +1800,7 @@
 
                 catAnimeList.forEach(item => {
                     let seasonBadgeHTML = `<div class="season-badge">${formatSeasonText(item.season, item.animeType, item.part, item.ovaType)}</div>`;
+                    let noteHTML = item.note ? `<div class="anime-card-note">📝 ${item.note}</div>` : '';
                     let epStr = formatEpText(item.episodes || item.totalEp, item.animeType, item.ovaType);
                     let orientationClass = item.orientation === 'landscape' ? 'card-landscape' : 'card-portrait';
                     let pinnedClass = item.isPinned ? 'pinned-card' : '';
@@ -1715,7 +1880,7 @@
                                     <button onclick="moveOrderById('${item.id}', 1)">➡️ Move Right</button>
                                     <button onclick="openMoveModal('${item.id}')" style="color: #38bdf8; font-weight: bold;">🔁 Move Section</button>
                                     <button onclick="openSeasonsModal('${item.id}')" style="color: #f97316; font-weight: bold;">🔗 Manage Seasons</button>
-                                    <button onclick="editCard('${item.id}')">✏️ Edit Poster / Card</button>
+                                    <button onclick="editCard('${item.id}')">✏️ Edit Anime Info</button>
                                     <button onclick="deleteCard('${item.id}')">🗑️ Delete</button>
                                     <button onclick="cloneCard('${item.id}')">📑 Clone</button>
                                     <button onclick="shareCard('${item.id}')">🔗 Share</button>
@@ -1728,6 +1893,7 @@
                         <div class="anime-info">
                             <h3 class="anime-title" title="${item.title}">${item.title}</h3>
                             ${seasonBadgeHTML}
+                            ${noteHTML}
                             ${otherSeasonsHTML}
                     `;
 
@@ -1757,18 +1923,17 @@
                         let leftEp = Math.max(0, totalNum - watchedNum);
                         cardHTML += `
                             <div class="anime-meta">
-                                Total: ${item.totalEp || 'N/A'}<br>
-                                Watched: ${item.watchedEp || 'N/A'}<br>
-                                Left: ${leftEp}<br>
-                                Last: ${item.lastWatched || 'N/A'}
+                                Total: ${totalNum} Ep | Watched: ${watchedNum}<br>
+                                Remaining: <span style="color: #f97316; font-weight: bold;">${leftEp} Ep Left</span><br>
+                                Last Watched: ${item.lastWatched || 'N/A'}
                             </div>
                         `;
                     } else if (item.category === 'completed') {
                         cardHTML += `
                             <div class="anime-meta">
                                 Total Ep: ${item.totalEp || 'N/A'}<br>
-                                Rating: ${item.rating || 'N/A'}<br>
-                                Year: ${item.watchYear || 'N/A'}
+                                Rating: ${item.rating || 'N/A'} ⭐<br>
+                                Watched Year: ${item.watchYear || 'N/A'}
                             </div>
                         `;
                     }
@@ -1790,65 +1955,6 @@
             }
         });
     }
-
-    function parseSizeInMB(sizeStr) {
-        if (!sizeStr) return 0;
-        let str = sizeStr.toString().trim().toUpperCase();
-        let val = parseFloat(str);
-        if (isNaN(val)) return 0;
-        if (str.includes('GB')) return val * 1024;
-        if (str.includes('MB')) return val;
-        if (str.includes('KB')) return val / 1024;
-        return val;
-    }
-
-    window.filterAndSort = function() {
-        let filtered = [...animeData];
-        
-        const searchText = document.getElementById('searchBox').value.toLowerCase().trim();
-        const catFilter = document.getElementById('filterCategory').value;
-        const typeFilter = document.getElementById('filterType').value;
-        const addOrder = document.getElementById('addOrderOption').value;
-        const sortOption = document.getElementById('sortOption').value;
-
-        if (searchText !== '') {
-            filtered = filtered.filter(item => 
-                (item.title && item.title.toLowerCase().includes(searchText)) || 
-                (item.animeCode && item.animeCode.toLowerCase().includes(searchText))
-            );
-        }
-
-        if (catFilter !== 'all') {
-            filtered = filtered.filter(item => item.category === catFilter);
-        }
-
-        if (typeFilter !== 'all') {
-            filtered = filtered.filter(item => (item.animeType || 'series') === typeFilter);
-        }
-
-        let pinnedItems = filtered.filter(item => item.isPinned);
-        let unpinnedItems = filtered.filter(item => !item.isPinned);
-
-        const applySorting = (list) => {
-            if (sortOption === 'high-low') {
-                list.sort((a, b) => parseSizeInMB(b.size) - parseSizeInMB(a.size));
-            } else if (sortOption === 'low-high') {
-                list.sort((a, b) => parseSizeInMB(a.size) - parseSizeInMB(b.size));
-            } else {
-                if (addOrder === 'old-to-new') {
-                    list.sort((a, b) => (b.order || 0) - (a.order || 0));
-                } else {
-                    list.sort((a, b) => (a.order || 0) - (b.order || 0));
-                }
-            }
-        };
-
-        applySorting(pinnedItems);
-        applySorting(unpinnedItems);
-
-        renderCards([...pinnedItems, ...unpinnedItems]);
-    }
 </script>
-
 </body>
 </html>
