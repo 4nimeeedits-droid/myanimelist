@@ -150,10 +150,12 @@
         .bulk-item { display: flex; align-items: center; gap: 10px; background: #0f172a; padding: 8px 12px; border-radius: 6px; border: 1px solid #334155; margin-bottom: 6px; }
         .bulk-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; margin: 0; }
 
-        .season-list-item { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 8px; border-radius: 4px; margin-bottom: 6px; border: 1px solid #334155; }
-        .remove-season-btn { background: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
-        .confirm-remove-btn { background: #f97316; animation: blinkFast 0.5s infinite alternate; }
-        @keyframes blinkFast { from { opacity: 1; } to { opacity: 0.6; } }
+        .season-list-item { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 8px 12px; border-radius: 4px; margin-bottom: 6px; border: 1px solid #334155; }
+        .season-action-group { display: flex; align-items: center; gap: 6px; }
+        .order-btn { background: #334155; color: #38bdf8; border: 1px solid #38bdf8; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
+        .order-btn:hover { background: #38bdf8; color: #000; }
+        .remove-season-btn { background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
+        .confirm-remove-btn { background: #f97316 !important; color: #fff !important; }
 
         .sub-box { background: #0f172a; border: 1px solid #334155; padding: 10px; border-radius: 6px; margin-bottom: 12px; }
         .sub-box-title { font-size: 0.85rem; color: #38bdf8; font-weight: bold; margin-bottom: 6px; display: block; }
@@ -489,19 +491,19 @@
 
 <div id="seasonsModal" class="modal-overlay">
     <div class="modal-content">
-        <h3 style="color: #f97316; margin-top:0;" id="seasonModalTitle">Manage Other Seasons</h3>
+        <h3 style="color: #f97316; margin-top:0;" id="seasonModalTitle">Manage Other Seasons & OVAs</h3>
         
         <div style="margin-bottom: 15px;">
-            <label style="font-size: 0.85rem; color: #38bdf8; font-weight: bold;">Connected Seasons List:</label>
+            <label style="font-size: 0.85rem; color: #38bdf8; font-weight: bold;">Connected Seasons/OVAs List (Arrange Order with ⬆️ ⬇️):</label>
             <div id="connectedSeasonsList" style="margin-top: 8px;"></div>
         </div>
 
         <div class="sub-box">
-            <span class="sub-box-title">Tap & Select Season (Auto-Identify):</span>
+            <span class="sub-box-title">Tap & Select Season/OVA (Auto-Identify):</span>
             <select id="seasonLinkSelect">
-                <option value="">-- Select Anime to Link --</option>
+                <option value="">-- Select Anime/OVA to Link --</option>
             </select>
-            <button class="action-btn" style="margin-top:5px;" onclick="linkNewSeason()">🔗 Link Selected Season</button>
+            <button class="action-btn" style="margin-top:5px;" onclick="linkNewSeason()">🔗 Link Selected Season / OVA</button>
         </div>
 
         <div class="sub-box">
@@ -845,12 +847,6 @@
                 <input type="text" id="${prefix}WatchYear" placeholder="Year Watched">
             `;
         }
-    }
-
-    function parseSeasonNum(seasonVal) {
-        if (!seasonVal) return 1;
-        let num = parseInt(seasonVal.toString().replace(/\D/g, ''));
-        return isNaN(num) ? 1 : num;
     }
 
     function formatSeasonText(val, animeType = 'series', part = '', ovaType = 'episodes') {
@@ -1211,7 +1207,7 @@
         let currentItem = animeData.find(a => a.id === id);
         if(!currentItem) return;
         activeSeasonAnimeId = currentItem.id;
-        document.getElementById('seasonModalTitle').innerText = `Manage Seasons for "${currentItem.title}"`;
+        document.getElementById('seasonModalTitle').innerText = `Manage Seasons & OVAs for "${currentItem.title}"`;
         renderSeasonsManager();
         document.getElementById('seasonsModal').style.display = 'flex';
     }
@@ -1229,32 +1225,114 @@
         let container = document.getElementById('connectedSeasonsList');
         container.innerHTML = '';
 
+        let manualLinks = currentItem.manualLinkedIds || [];
         let relatedSeasons = animeData.filter(a => 
             a.id !== currentItem.id && 
-            (a.title.trim().toLowerCase() === currentItem.title.trim().toLowerCase() || (currentItem.manualLinkedIds && currentItem.manualLinkedIds.includes(a.id)))
+            (a.title.trim().toLowerCase() === currentItem.title.trim().toLowerCase() || manualLinks.includes(a.id))
         );
+
+        if (manualLinks.length > 0) {
+            relatedSeasons.sort((a, b) => {
+                let idxA = manualLinks.indexOf(a.id);
+                let idxB = manualLinks.indexOf(b.id);
+                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                return a.order - b.order;
+            });
+        }
 
         if (relatedSeasons.length === 0) {
             container.innerHTML = `<p style="color: #94a3b8; font-size: 0.85rem;">No other seasons/movies/OVAs linked currently.</p>`;
         } else {
-            relatedSeasons.forEach(rel => {
+            relatedSeasons.forEach((rel, index) => {
                 let sName = formatSeasonText(rel.season, rel.animeType, rel.part, rel.ovaType);
                 let div = document.createElement('div');
                 div.className = 'season-list-item';
                 div.innerHTML = `
                     <span style="font-size: 0.85rem; font-weight: bold;">${rel.title} (${sName}) - <i style="color: #38bdf8;">${rel.category}</i></span>
-                    <button class="remove-season-btn" id="remBtn-${rel.id}" onclick="triggerRemoveSeason('${rel.id}')">Remove Link</button>
+                    <div class="season-action-group">
+                        <button class="order-btn" onclick="shiftLinkedSeasonOrder('${rel.id}', -1)">⬆️ Up</button>
+                        <button class="order-btn" onclick="shiftLinkedSeasonOrder('${rel.id}', 1)">⬇️ Down</button>
+                        <button class="remove-season-btn" id="remBtn-${rel.id}" onclick="showRemoveConfirmBtn('${rel.id}')">Remove Link</button>
+                        <button class="remove-season-btn confirm-remove-btn" id="confBtn-${rel.id}" style="display:none;" onclick="unlinkSeason('${rel.id}')">Confirm Remove</button>
+                    </div>
                 `;
                 container.appendChild(div);
             });
         }
 
         let selectDropdown = document.getElementById('seasonLinkSelect');
-        selectDropdown.innerHTML = `<option value="">-- Tap & Select Anime --</option>`;
+        selectDropdown.innerHTML = `<option value="">-- Tap & Select Anime / OVA --</option>`;
         animeData.filter(a => a.id !== currentItem.id).forEach(a => {
             let sText = formatSeasonText(a.season, a.animeType, a.part, a.ovaType);
             selectDropdown.innerHTML += `<option value="${a.id}">${a.title} [${sText}] (${a.category})</option>`;
         });
+    }
+
+    window.shiftLinkedSeasonOrder = async function(targetId, direction) {
+        let currentItem = animeData.find(a => a.id === activeSeasonAnimeId);
+        if (!currentItem) return;
+
+        let links = currentItem.manualLinkedIds || [];
+        if (!links.includes(targetId)) {
+            let related = animeData.filter(a => 
+                a.id !== currentItem.id && 
+                (a.title.trim().toLowerCase() === currentItem.title.trim().toLowerCase() || links.includes(a.id))
+            );
+            links = related.map(r => r.id);
+        }
+
+        let index = links.indexOf(targetId);
+        if (index === -1) return;
+
+        let newIndex = index + direction;
+        if (newIndex < 0 || newIndex >= links.length) return;
+
+        let temp = links[index];
+        links[index] = links[newIndex];
+        links[newIndex] = temp;
+
+        currentItem.manualLinkedIds = links;
+
+        try {
+            await updateDoc(doc(db, "animes", activeSeasonAnimeId), { manualLinkedIds: links });
+            renderSeasonsManager();
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    window.showRemoveConfirmBtn = function(targetId) {
+        let remBtn = document.getElementById(`remBtn-${targetId}`);
+        let confBtn = document.getElementById(`confBtn-${targetId}`);
+        if (remBtn && confBtn) {
+            remBtn.style.display = 'none';
+            confBtn.style.display = 'inline-block';
+            setTimeout(() => {
+                if (remBtn && confBtn && confBtn.style.display !== 'none') {
+                    confBtn.style.display = 'none';
+                    remBtn.style.display = 'inline-block';
+                }
+            }, 4000);
+        }
+    }
+
+    window.unlinkSeason = async function(targetId) {
+        let currentItem = animeData.find(a => a.id === activeSeasonAnimeId);
+        let targetItem = animeData.find(a => a.id === targetId);
+
+        let currentLinks = (currentItem.manualLinkedIds || []).filter(id => id !== targetId);
+        let targetLinks = targetItem ? (targetItem.manualLinkedIds || []).filter(id => id !== activeSeasonAnimeId) : [];
+
+        try {
+            await updateDoc(doc(db, "animes", activeSeasonAnimeId), { manualLinkedIds: currentLinks });
+            if (targetItem) {
+                await updateDoc(doc(db, "animes", targetId), { manualLinkedIds: targetLinks });
+            }
+            currentItem.manualLinkedIds = currentLinks;
+            renderSeasonsManager();
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     window.linkNewSeason = async function() {
@@ -1273,8 +1351,9 @@
         try {
             await updateDoc(doc(db, "animes", activeSeasonAnimeId), { manualLinkedIds: currentLinks });
             await updateDoc(doc(db, "animes", selectedId), { manualLinkedIds: targetLinks });
+            currentItem.manualLinkedIds = currentLinks;
             renderSeasonsManager();
-            alert("Season successfully linked!");
+            alert("Season / OVA successfully linked!");
         } catch (err) {
             console.error(err);
         }
@@ -1318,42 +1397,6 @@
         } catch (err) {
             console.error(err);
             alert("Error adding quick season!");
-        }
-    }
-
-    window.triggerRemoveSeason = function(targetId) {
-        let btn = document.getElementById(`remBtn-${targetId}`);
-        if (!btn) return;
-
-        if (btn.classList.contains('confirm-remove-btn')) {
-            unlinkSeason(targetId);
-        } else {
-            btn.classList.add('confirm-remove-btn');
-            btn.innerText = "Confirm Remove?";
-            setTimeout(() => {
-                if (btn) {
-                    btn.classList.remove('confirm-remove-btn');
-                    btn.innerText = "Remove Link";
-                }
-            }, 3000);
-        }
-    }
-
-    async function unlinkSeason(targetId) {
-        let currentItem = animeData.find(a => a.id === activeSeasonAnimeId);
-        let targetItem = animeData.find(a => a.id === targetId);
-
-        let currentLinks = (currentItem.manualLinkedIds || []).filter(id => id !== targetId);
-        let targetLinks = (targetItem.manualLinkedIds || []).filter(id => id !== activeSeasonAnimeId);
-
-        try {
-            await updateDoc(doc(db, "animes", activeSeasonAnimeId), { manualLinkedIds: currentLinks });
-            if (targetItem) {
-                await updateDoc(doc(db, "animes", targetId), { manualLinkedIds: targetLinks });
-            }
-            renderSeasonsManager();
-        } catch (err) {
-            console.error(err);
         }
     }
 
@@ -1602,10 +1645,20 @@
                     let newBadgeHTML = item.isNew ? `<div class="new-badge">NEW</div>` : '';
                     let codeBadgeHTML = item.animeCode ? `<div class="anime-code-badge">${item.animeCode}</div>` : '';
 
+                    let manualLinks = item.manualLinkedIds || [];
                     let relatedSeasons = animeData.filter(a => 
                         a.id !== item.id && 
-                        (a.title.trim().toLowerCase() === item.title.trim().toLowerCase() || (item.manualLinkedIds && item.manualLinkedIds.includes(a.id)))
+                        (a.title.trim().toLowerCase() === item.title.trim().toLowerCase() || manualLinks.includes(a.id))
                     );
+
+                    if (manualLinks.length > 0) {
+                        relatedSeasons.sort((a, b) => {
+                            let idxA = manualLinks.indexOf(a.id);
+                            let idxB = manualLinks.indexOf(b.id);
+                            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                            return a.order - b.order;
+                        });
+                    }
                     
                     let otherSeasonsHTML = '';
                     if (relatedSeasons.length > 0) {
@@ -1699,66 +1752,101 @@
                             <a href="${item.link || '#'}" class="ongoing-btn" target="_blank">Ongoing Link</a>
                         `;
                     } else if (item.category === 'watching') {
+                        let totalNum = parseInt(item.totalEp) || 0;
+                        let watchedNum = parseInt(item.watchedEp) || 0;
+                        let leftEp = Math.max(0, totalNum - watchedNum);
                         cardHTML += `
                             <div class="anime-meta">
                                 Total: ${item.totalEp || 'N/A'}<br>
                                 Watched: ${item.watchedEp || 'N/A'}<br>
-                                Left: ${item.lastWatched || 'N/A'}
+                                Left: ${leftEp}<br>
+                                Last: ${item.lastWatched || 'N/A'}
                             </div>
                         `;
                     } else if (item.category === 'completed') {
                         cardHTML += `
                             <div class="anime-meta">
-                                Total: ${item.totalEp || 'N/A'}<br>
+                                Total Ep: ${item.totalEp || 'N/A'}<br>
                                 Rating: ${item.rating || 'N/A'}<br>
-                                Watched: ${item.watchYear || 'N/A'}
+                                Year: ${item.watchYear || 'N/A'}
                             </div>
                         `;
                     }
 
-                    cardHTML += `</div></div>`;
+                    cardHTML += `
+                            </div>
+                        </div>
+                    `;
+
                     sectionHTML += cardHTML;
                 });
 
                 sectionHTML += `
                         </div>
-                    </div>`;
+                    </div>
+                `;
+
                 container.innerHTML += sectionHTML;
             }
         });
     }
 
+    function parseSizeInMB(sizeStr) {
+        if (!sizeStr) return 0;
+        let str = sizeStr.toString().trim().toUpperCase();
+        let val = parseFloat(str);
+        if (isNaN(val)) return 0;
+        if (str.includes('GB')) return val * 1024;
+        if (str.includes('MB')) return val;
+        if (str.includes('KB')) return val / 1024;
+        return val;
+    }
+
     window.filterAndSort = function() {
-        let query = document.getElementById('searchBox').value.toLowerCase();
-        let selectedCategory = document.getElementById('filterCategory').value;
-        let selectedType = document.getElementById('filterType').value;
-        let addOrderOption = document.getElementById('addOrderOption').value;
-        let sortOption = document.getElementById('sortOption').value;
+        let filtered = [...animeData];
+        
+        const searchText = document.getElementById('searchBox').value.toLowerCase().trim();
+        const catFilter = document.getElementById('filterCategory').value;
+        const typeFilter = document.getElementById('filterType').value;
+        const addOrder = document.getElementById('addOrderOption').value;
+        const sortOption = document.getElementById('sortOption').value;
 
-        let filtered = animeData.filter(item => {
-            let matchesSearch = item.title.toLowerCase().includes(query) || 
-                                (item.season && item.season.toString().toLowerCase().includes(query)) ||
-                                (item.animeCode && item.animeCode.toLowerCase().includes(query));
-            let matchesCat = (selectedCategory === 'all' || item.category === selectedCategory);
-            let matchesType = (selectedType === 'all' || (item.animeType || 'series') === selectedType);
-            return matchesSearch && matchesCat && matchesType;
-        });
-
-        if (sortOption === 'high-low') {
-            filtered.sort((a, b) => (parseInt(b.totalEp || b.episodes) || 0) - (parseInt(a.totalEp || a.episodes) || 0));
-        } else if (sortOption === 'low-high') {
-            filtered.sort((a, b) => (parseInt(a.totalEp || a.episodes) || 0) - (parseInt(b.totalEp || b.episodes) || 0));
-        } else if (sortOption === 'custom') {
-            if (addOrderOption === 'new-to-old') {
-                filtered.sort((a, b) => a.order - b.order);
-            } else {
-                filtered.sort((a, b) => b.order - a.order);
-            }
+        if (searchText !== '') {
+            filtered = filtered.filter(item => 
+                (item.title && item.title.toLowerCase().includes(searchText)) || 
+                (item.animeCode && item.animeCode.toLowerCase().includes(searchText))
+            );
         }
 
-        filtered.sort((a, b) => (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0));
+        if (catFilter !== 'all') {
+            filtered = filtered.filter(item => item.category === catFilter);
+        }
 
-        renderCards(filtered);
+        if (typeFilter !== 'all') {
+            filtered = filtered.filter(item => (item.animeType || 'series') === typeFilter);
+        }
+
+        let pinnedItems = filtered.filter(item => item.isPinned);
+        let unpinnedItems = filtered.filter(item => !item.isPinned);
+
+        const applySorting = (list) => {
+            if (sortOption === 'high-low') {
+                list.sort((a, b) => parseSizeInMB(b.size) - parseSizeInMB(a.size));
+            } else if (sortOption === 'low-high') {
+                list.sort((a, b) => parseSizeInMB(a.size) - parseSizeInMB(b.size));
+            } else {
+                if (addOrder === 'old-to-new') {
+                    list.sort((a, b) => (b.order || 0) - (a.order || 0));
+                } else {
+                    list.sort((a, b) => (a.order || 0) - (b.order || 0));
+                }
+            }
+        };
+
+        applySorting(pinnedItems);
+        applySorting(unpinnedItems);
+
+        renderCards([...pinnedItems, ...unpinnedItems]);
     }
 </script>
 
