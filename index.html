@@ -2,11 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- Viewport Auto-Fit Fix: Auto Zoom-Out for Desktop View -->
     <meta name="viewport" content="width=1280">
     <title>Premium Anime Hub</title>
 
-    <!-- Cropper.js CSS for Image Cropping -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
 
     <style>
@@ -33,26 +31,17 @@
         
         /* Auto Wrapping Grid Container */
         .anime-row-wrapper { width: 100%; }
-        .anime-row { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 20px; 
-            width: 100%; 
-            box-sizing: border-box; 
-            align-items: stretch; 
-        }
+        .anime-row { display: flex; flex-wrap: wrap; gap: 20px; width: 100%; box-sizing: border-box; align-items: stretch; }
 
         .anime-card { background: #141b2d; border-radius: 10px; overflow: visible; border: 1px solid #1e293b; position: relative; transition: all 0.3s ease; display: flex; flex-direction: column; cursor: pointer; }
         .anime-card:hover { transform: translateY(-4px); border-color: #f97316; }
 
-        /* Larger Card Sizes for High Visibility */
         .card-portrait { width: 260px; flex-shrink: 0; }
         .card-portrait .anime-poster { width: 100%; height: 330px; object-fit: cover; display: block; border-radius: 10px 10px 0 0; }
 
         .card-landscape { width: 380px; flex-shrink: 0; }
         .card-landscape .anime-poster { width: 100%; height: 230px; object-fit: cover; display: block; border-radius: 10px 10px 0 0; }
 
-        /* Skeleton Loading Cards */
         .skeleton-card { background: #141b2d; border-radius: 10px; border: 1px solid #1e293b; flex-shrink: 0; width: 260px; height: 440px; padding: 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; }
         .skeleton-poster { width: 100%; height: 300px; background: #1e293b; border-radius: 6px; animation: skeletonPulse 1.2s infinite ease-in-out; }
         .skeleton-text { height: 20px; background: #1e293b; border-radius: 4px; animation: skeletonPulse 1.2s infinite ease-in-out; }
@@ -64,13 +53,11 @@
             100% { opacity: 0.4; }
         }
 
-        /* Badge Styles */
         .badges-container { position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 6px; z-index: 10; align-items: flex-start; }
         .pin-badge { background: #f59e0b; color: #000; font-size: 0.85rem; font-weight: 800; padding: 4px 10px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.6); }
         .new-badge { background: #22c55e; color: #000; font-size: 0.85rem; font-weight: 800; padding: 4px 10px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.6); animation: pulseGreen 2s infinite alternate; }
         .anime-code-badge { background: #38bdf8; color: #0f172a; font-size: 0.85rem; font-weight: 800; padding: 4px 10px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.6); }
         
-        /* Anime Type Badges */
         .anime-type-badge { background: #ec4899; color: #fff; font-size: 0.8rem; font-weight: 900; padding: 3px 8px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.6); text-transform: uppercase; letter-spacing: 0.5px; }
         .type-movie { background: #eab308; color: #000; }
         .type-ova { background: #8b5cf6; color: #fff; }
@@ -79,48 +66,10 @@
         @keyframes pulseGreen { from { opacity: 1; } to { opacity: 0.7; } }
         .anime-card.pinned-card { border: 2px solid #f59e0b; }
 
-        /* High Visibility Spotlight Feature for Selected Season Jump */
-        #spotlightOverlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 999;
-            backdrop-filter: blur(4px);
-            pointer-events: none;
-        }
-
-        .spotlight-active {
-            position: relative !important;
-            z-index: 1001 !important;
-            transform: scale(1.15) !important;
-            box-shadow: 0 0 35px #f97316, 0 0 70px #38bdf8 !important;
-            border: 3px solid #f97316 !important;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-        }
-
-        .season-pointer-badge {
-            position: absolute;
-            top: -55px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #f97316;
-            color: #ffffff;
-            font-weight: 900;
-            font-size: 0.95rem;
-            padding: 8px 16px;
-            border-radius: 20px;
-            box-shadow: 0 4px 20px rgba(249, 115, 22, 0.9);
-            z-index: 1002;
-            white-space: nowrap;
-            letter-spacing: 0.5px;
-            animation: bouncePointer 0.5s infinite alternate ease-in-out;
-        }
-
-        @keyframes bouncePointer {
-            0% { transform: translate(-50%, 0); }
-            100% { transform: translate(-50%, -10px); }
-        }
+        #spotlightOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); z-index: 999; backdrop-filter: blur(4px); pointer-events: none; }
+        .spotlight-active { position: relative !important; z-index: 1001 !important; transform: scale(1.15) !important; box-shadow: 0 0 35px #f97316, 0 0 70px #38bdf8 !important; border: 3px solid #f97316 !important; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; }
+        .season-pointer-badge { position: absolute; top: -55px; left: 50%; transform: translateX(-50%); background: #f97316; color: #ffffff; font-weight: 900; font-size: 0.95rem; padding: 8px 16px; border-radius: 20px; box-shadow: 0 4px 20px rgba(249, 115, 22, 0.9); z-index: 1002; white-space: nowrap; letter-spacing: 0.5px; animation: bouncePointer 0.5s infinite alternate ease-in-out; }
+        @keyframes bouncePointer { 0% { transform: translate(-50%, 0); } 100% { transform: translate(-50%, -10px); } }
 
         .card-menu-container { position: absolute; top: 10px; right: 10px; z-index: 15; display: none; }
         .dots-btn { background: rgba(0,0,0,0.85); color: #fff; border: 1px solid #334155; padding: 6px 12px; border-radius: 18px; cursor: pointer; font-size: 1.1rem; font-weight: bold; }
@@ -129,16 +78,10 @@
         .dropdown-menu button:hover { background: #f97316; color: #fff; }
 
         .anime-info { padding: 14px; display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1; background: #141b2d; border-radius: 0 0 10px 10px; }
-        
         .anime-title { color: #fff; font-size: 1.25rem; font-weight: 800; margin: 0 0 8px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.3px; }
-        
         .season-badge { display: inline-block; background: #f97316; color: #ffffff; font-size: 0.95rem; font-weight: 900; padding: 4px 10px; border-radius: 5px; text-transform: uppercase; margin-bottom: 8px; align-self: flex-start; letter-spacing: 0.5px; box-shadow: 0 2px 6px rgba(0,0,0,0.4); }
-
-        /* Anime Card Note Section Styling */
         .anime-card-note { background: #1a233a; border-left: 3px solid #f97316; padding: 6px 8px; border-radius: 4px; font-size: 0.85rem; color: #cbd5e1; margin-bottom: 8px; word-break: break-word; }
-
         .other-seasons-select { width: 100%; background: #0f172a; color: #38bdf8; border: 1.5px solid #38bdf8; font-size: 0.95rem; font-weight: bold; padding: 8px 6px; border-radius: 6px; margin-bottom: 8px; cursor: pointer; text-align: center; }
-
         .anime-meta { color: #cbd5e1; font-size: 0.95rem; font-weight: 600; margin-bottom: 10px; line-height: 1.5; }
         
         .btn-container { display: flex; flex-direction: column; gap: 8px; margin-top: auto; }
@@ -147,12 +90,12 @@
         .filepress { background: #38bdf8; }
         .appdrive { background: #22c55e; }
         .hubcloud { background: #a855f7; color: #fff; }
+        .gdflix { background: #eab308; color: #000; } /* New GDflix color */
         .customlink { background: #f97316; color: #fff; }
         .ongoing-btn { background: #f59e0b; display: block; padding: 10px; text-align: center; color: #000; text-decoration: none; border-radius: 6px; font-weight: 800; font-size: 0.95rem; }
 
         .bulk-item { display: flex; align-items: center; gap: 10px; background: #0f172a; padding: 8px 12px; border-radius: 6px; border: 1px solid #334155; margin-bottom: 6px; }
         .bulk-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; margin: 0; }
-
         .season-list-item { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 8px 12px; border-radius: 4px; margin-bottom: 6px; border: 1px solid #334155; }
         .season-action-group { display: flex; align-items: center; gap: 6px; }
         .order-btn { background: #334155; color: #38bdf8; border: 1px solid #38bdf8; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
@@ -165,147 +108,24 @@
         
         .crop-container { width: 100%; min-height: 320px; max-height: 480px; background: #000; margin-bottom: 15px; overflow: hidden; border-radius: 6px; position: relative; }
         .crop-container img { max-width: 100%; display: block; }
-
         .cropper-point { width: 12px !important; height: 12px !important; background-color: #38bdf8 !important; opacity: 0.9 !important; }
         .cropper-line { background-color: #f97316 !important; }
 
-        .detail-modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(11, 14, 20, 0.95);
-            backdrop-filter: blur(8px);
-            z-index: 2000;
-            overflow-y: auto;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 30px 15px;
-            box-sizing: border-box;
-        }
-
-        .detail-card-container {
-            background: #141b2d;
-            border: 2px solid #38bdf8;
-            border-radius: 16px;
-            width: 100%;
-            max-width: 850px;
-            position: relative;
-            padding: 25px;
-            box-sizing: border-box;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.9), 0 0 20px rgba(56, 189, 248, 0.3);
-            margin: auto;
-            animation: modalFadeIn 0.3s ease-out;
-        }
-
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .close-detail-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 42px;
-            height: 42px;
-            background: #ef4444;
-            color: #ffffff;
-            border: 2px solid #ffffff;
-            border-radius: 50%;
-            font-size: 1.5rem;
-            font-weight: 900;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.6);
-            transition: transform 0.2s ease, background 0.2s ease;
-            z-index: 10;
-        }
-
-        .close-detail-btn:hover {
-            transform: scale(1.15) rotate(90deg);
-            background: #dc2626;
-        }
-
-        .detail-layout {
-            display: flex;
-            gap: 25px;
-            flex-wrap: wrap;
-            margin-top: 10px;
-        }
-
-        .detail-poster-wrapper {
-            flex: 0 0 320px;
-            max-width: 100%;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.6);
-            border: 1px solid #334155;
-        }
-
-        .detail-poster-wrapper img {
-            width: 100%;
-            height: auto;
-            display: block;
-            object-fit: cover;
-        }
-
-        .detail-content {
-            flex: 1;
-            min-width: 280px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .detail-title {
-            font-size: 2rem;
-            font-weight: 900;
-            color: #ffffff;
-            margin: 0 0 12px 0;
-            line-height: 1.2;
-            word-break: break-word;
-        }
-
-        .detail-meta-group {
-            background: #0f172a;
-            border-radius: 10px;
-            padding: 16px;
-            border: 1px solid #334155;
-            margin-bottom: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .detail-meta-item {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: #cbd5e1;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .detail-meta-item span {
-            color: #38bdf8;
-            font-weight: 800;
-        }
-
-        .detail-btn-container {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: auto;
-        }
-
-        .detail-btn-container .link-btn, .detail-btn-container .ongoing-btn {
-            padding: 14px 0;
-            font-size: 1.15rem;
-            border-radius: 8px;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-        }
+        .detail-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 14, 20, 0.95); backdrop-filter: blur(8px); z-index: 2000; overflow-y: auto; justify-content: center; align-items: flex-start; padding: 30px 15px; box-sizing: border-box; }
+        .detail-card-container { background: #141b2d; border: 2px solid #38bdf8; border-radius: 16px; width: 100%; max-width: 850px; position: relative; padding: 25px; box-sizing: border-box; box-shadow: 0 10px 40px rgba(0,0,0,0.9), 0 0 20px rgba(56, 189, 248, 0.3); margin: auto; animation: modalFadeIn 0.3s ease-out; }
+        @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .close-detail-btn { position: absolute; top: 15px; right: 15px; width: 42px; height: 42px; background: #ef4444; color: #ffffff; border: 2px solid #ffffff; border-radius: 50%; font-size: 1.5rem; font-weight: 900; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.6); transition: transform 0.2s ease, background 0.2s ease; z-index: 10; }
+        .close-detail-btn:hover { transform: scale(1.15) rotate(90deg); background: #dc2626; }
+        .detail-layout { display: flex; gap: 25px; flex-wrap: wrap; margin-top: 10px; }
+        .detail-poster-wrapper { flex: 0 0 320px; max-width: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 6px 18px rgba(0,0,0,0.6); border: 1px solid #334155; }
+        .detail-poster-wrapper img { width: 100%; height: auto; display: block; object-fit: cover; }
+        .detail-content { flex: 1; min-width: 280px; display: flex; flex-direction: column; }
+        .detail-title { font-size: 2rem; font-weight: 900; color: #ffffff; margin: 0 0 12px 0; line-height: 1.2; word-break: break-word; }
+        .detail-meta-group { background: #0f172a; border-radius: 10px; padding: 16px; border: 1px solid #334155; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .detail-meta-item { font-size: 1.15rem; font-weight: 700; color: #cbd5e1; display: flex; align-items: center; gap: 8px; }
+        .detail-meta-item span { color: #38bdf8; font-weight: 800; }
+        .detail-btn-container { display: flex; flex-direction: column; gap: 12px; margin-top: auto; }
+        .detail-btn-container .link-btn, .detail-btn-container .ongoing-btn { padding: 14px 0; font-size: 1.15rem; border-radius: 8px; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
     </style>
 </head>
 <body>
@@ -347,8 +167,6 @@
         </div>
 
         <input type="text" id="inputAnimeCode" placeholder="Anime Code (e.g. #001, A-12)">
-
-        <!-- Note Field Added in Add Panel -->
         <textarea id="inputNote" placeholder="Anime Note (Optional)..." rows="2"></textarea>
 
         <div id="seasonContainer">
@@ -423,22 +241,12 @@
     </div>
 
     <div id="animeSectionsContainer">
-        <div class="section-title">For Download</div>
-        <div class="anime-row-wrapper">
-            <div class="anime-row">
-                <div class="skeleton-card"><div class="skeleton-poster"></div><div class="skeleton-text"></div><div class="skeleton-text short"></div></div>
-                <div class="skeleton-card"><div class="skeleton-poster"></div><div class="skeleton-text"></div><div class="skeleton-text short"></div></div>
-                <div class="skeleton-card"><div class="skeleton-poster"></div><div class="skeleton-text"></div><div class="skeleton-text short"></div></div>
-                <div class="skeleton-card"><div class="skeleton-poster"></div><div class="skeleton-text"></div><div class="skeleton-text short"></div></div>
-            </div>
         </div>
-    </div>
 </div>
 
 <div id="cropModal" class="modal-overlay">
     <div class="modal-content">
         <h3 style="color: #38bdf8; margin-top:0;">✂️ Crop Poster Image</h3>
-        
         <div style="margin-bottom: 10px;">
             <label style="font-size: 0.85rem; color: #38bdf8; font-weight: bold;">Crop Style / Drag Handles Mode:</label>
             <select id="cropModeSelect" onchange="changeCropMode()" style="margin-top: 4px;">
@@ -446,13 +254,10 @@
                 <option value="fixed">🔒 Lock Ratio (Fixed Card Shape)</option>
             </select>
         </div>
-
         <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 10px;">Ungaliyon ya mouse se rectangle ke kisi bhi side/corner ko khinch kar crop area adjust karein:</p>
-        
         <div class="crop-container">
             <img id="cropImageTarget" src="">
         </div>
-
         <button class="action-btn" style="background: #22c55e; color: #000;" onclick="applyCrop()">✂️ Crop & Save Poster</button>
         <button class="action-btn close-btn" onclick="closeCropModal()">Cancel</button>
     </div>
@@ -462,14 +267,11 @@
     <div class="modal-content">
         <h3 style="color: #22c55e; margin-top:0;">⚡ Bulk Manage NEW Badge</h3>
         <p style="font-size: 0.85rem; color: #94a3b8;">Select anime cards to turn their NEW badge ON or OFF together:</p>
-        
         <div style="margin-bottom: 10px;">
             <button style="background: #334155; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer;" onclick="toggleSelectAllBulk(true)">Select All</button>
             <button style="background: #334155; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; margin-left: 5px;" onclick="toggleSelectAllBulk(false)">Deselect All</button>
         </div>
-
         <div id="bulkAnimeList" style="max-height: 250px; overflow-y: auto; margin-bottom: 15px;"></div>
-
         <button class="action-btn" style="background: #22c55e; color: #000;" onclick="submitBulkNewState(true)">🟢 Turn ON NEW Badge For Selected</button>
         <button class="action-btn" style="background: #ef4444; color: #fff; margin-top: 5px;" onclick="submitBulkNewState(false)">⚪ Turn OFF NEW Badge For Selected</button>
         <button class="action-btn close-btn" onclick="closeBulkNewModal()">Cancel</button>
@@ -487,18 +289,24 @@
             <option value="watching">Currently Watching</option>
             <option value="completed">Watched List</option>
         </select>
-        
         <div id="moveDynamicFields"></div>
-        
         <button class="action-btn" onclick="submitMoveCard()">Confirm Move & Save</button>
         <button class="action-btn close-btn" onclick="closeMoveModal()">Cancel</button>
     </div>
 </div>
 
-<!-- Full Edit Modal to update Title, Type, OVA Type, Code, Note, Season, Part, Orientation, Links, and Total Episodes -->
 <div id="editModal" class="modal-overlay" style="display:none;">
     <div class="modal-content">
         <h3 style="color: #f97316; margin-top:0;">Edit Anime Info</h3>
+
+        <label style="font-size: 0.85rem; color: #38bdf8;">Section (Category):</label>
+        <select id="modalEditCategory">
+            <option value="download">For Download</option>
+            <option value="downloaded">Downloaded (USB)</option>
+            <option value="ongoing">Ongoing</option>
+            <option value="watching">Currently Watching</option>
+            <option value="completed">Watched List</option>
+        </select>
         
         <label style="font-size: 0.85rem; color: #38bdf8;">Anime Title:</label>
         <input type="text" id="modalEditTitle" placeholder="Anime Title">
@@ -529,9 +337,11 @@
             <input type="number" id="modalEditPart" placeholder="Part Number (e.g. 1, 2)">
         </div>
 
-        <!-- Newly added edit fields for Total Episodes and Download/Stream Links -->
         <label style="font-size: 0.85rem; color: #38bdf8;">Total Episodes / Duration:</label>
         <input type="text" id="modalEditEpisodes" placeholder="Total Episodes / Duration">
+
+        <label style="font-size: 0.85rem; color: #38bdf8;">Quality:</label>
+        <input type="text" id="modalEditQuality" placeholder="Quality (e.g. 720p)">
 
         <label style="font-size: 0.85rem; color: #38bdf8;">FilePress Link:</label>
         <input type="text" id="modalEditFilepress" placeholder="FilePress Link">
@@ -541,6 +351,9 @@
 
         <label style="font-size: 0.85rem; color: #38bdf8;">HubCloud Link:</label>
         <input type="text" id="modalEditHubcloud" placeholder="HubCloud Link">
+
+        <label style="font-size: 0.85rem; color: #38bdf8;">GDflix Link:</label>
+        <input type="text" id="modalEditGDflix" placeholder="GDflix Link">
 
         <label style="font-size: 0.85rem; color: #38bdf8;">Direct / Custom Link:</label>
         <input type="text" id="modalEditLink" placeholder="Direct Link">
@@ -557,6 +370,13 @@
             <option value="landscape">Landscape (Horizontal / Wide Poster)</option>
         </select>
 
+        <label style="font-size: 0.85rem; color: #38bdf8; display: block; margin-top: 10px; margin-bottom: 5px;">Update Poster Image (Leave blank to keep old):</label>
+        <input type="file" id="modalEditPosterFile" accept="image/*">
+        <div id="modalEditPosterPreviewContainer" style="display:none; margin-bottom: 10px; align-items: center; gap: 10px;">
+            <img id="modalEditPosterPreviewImg" src="" style="width: 70px; height: 90px; object-fit: cover; border-radius: 4px; border: 1px solid #38bdf8;">
+            <span style="font-size: 0.85rem; color: #22c55e; font-weight: bold;">✓ New Poster Ready</span>
+        </div>
+
         <button class="action-btn" onclick="saveModalEdit()">Save Changes</button>
         <button class="action-btn close-btn" onclick="closeEditModal()">Cancel</button>
     </div>
@@ -565,12 +385,10 @@
 <div id="seasonsModal" class="modal-overlay">
     <div class="modal-content">
         <h3 style="color: #f97316; margin-top:0;" id="seasonModalTitle">Manage Other Seasons & OVAs</h3>
-        
         <div style="margin-bottom: 15px;">
             <label style="font-size: 0.85rem; color: #38bdf8; font-weight: bold;">Connected Seasons/OVAs List (Arrange Order with ⬆️ ⬇️):</label>
             <div id="connectedSeasonsList" style="margin-top: 8px;"></div>
         </div>
-
         <div class="sub-box">
             <span class="sub-box-title">Tap & Select Season/OVA (Auto-Identify):</span>
             <select id="seasonLinkSelect">
@@ -578,13 +396,11 @@
             </select>
             <button class="action-btn" style="margin-top:5px;" onclick="linkNewSeason()">🔗 Link Selected Season / OVA</button>
         </div>
-
         <div class="sub-box">
             <span class="sub-box-title">➕ Quick Add New Season:</span>
             <input type="number" id="quickSeasonNum" placeholder="Season Number (e.g. 2, 3)" style="margin-bottom:6px;">
             <button class="action-btn" style="background:#f97316; color:#fff;" onclick="quickAddNewSeason()">⚡ Add & Link New Season</button>
         </div>
-
         <button class="action-btn close-btn" onclick="closeSeasonsModal()">Done & Close</button>
     </div>
 </div>
@@ -592,19 +408,16 @@
 <div id="animeDetailModal" class="detail-modal-overlay">
     <div class="detail-card-container">
         <button class="close-detail-btn" onclick="closeAnimeDetailModal()">✕</button>
-        
         <div class="detail-layout">
             <div class="detail-poster-wrapper">
                 <img id="detailPosterImg" src="" alt="Anime Poster">
             </div>
-            
             <div class="detail-content">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="detailBadgesContainer"></div>
                     <div id="detailCodeContainer"></div>
                 </div>
                 <h2 id="detailTitle" class="detail-title">Anime Title</h2>
-                
                 <div class="detail-meta-group">
                     <div id="detailTypeRow" class="detail-meta-item"><span>Format / Type:</span> <div id="detailTypeValue"></div></div>
                     <div id="detailSeasonRow" class="detail-meta-item"><span>Season / Info:</span> <div id="detailSeasonValue"></div></div>
@@ -613,7 +426,6 @@
                     <div id="detailSizeRow" class="detail-meta-item"><span>Size:</span> <div id="detailSizeValue"></div></div>
                     <div id="detailExtraRow" class="detail-meta-item" style="display:none;"><span>Status:</span> <div id="detailExtraValue"></div></div>
                 </div>
-
                 <div id="detailDownloadBtnContainer" class="detail-btn-container"></div>
             </div>
         </div>
@@ -650,6 +462,8 @@
 
     let cropperInstance = null;
     let croppedBase64Data = null;
+    window.editCroppedBase64Data = null; // New variable for Edit modal poster
+    window.isEditingPoster = false; // Flag to check which flow triggered crop
 
     const categoryTitles = {
         'download': 'For Download',
@@ -668,13 +482,24 @@
         await fetchAnimeFromFirebase();
     };
 
+    // Poster file change for Main Add form
     document.getElementById('inputPosterFile').addEventListener('change', function(e) {
+        window.isEditingPoster = false;
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(evt) {
-                openCropModal(evt.target.result);
-            };
+            reader.onload = function(evt) { openCropModal(evt.target.result); };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Poster file change for Edit Modal
+    document.getElementById('modalEditPosterFile').addEventListener('change', function(e) {
+        window.isEditingPoster = true;
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(evt) { openCropModal(evt.target.result); };
             reader.readAsDataURL(file);
         }
     });
@@ -685,25 +510,13 @@
         image.src = imageSrc;
         modal.style.display = 'flex';
 
-        if (cropperInstance) {
-            cropperInstance.destroy();
-        }
-
+        if (cropperInstance) cropperInstance.destroy();
         document.getElementById('cropModeSelect').value = 'free';
 
         cropperInstance = new Cropper(image, {
-            aspectRatio: NaN,
-            viewMode: 0,
-            dragMode: 'crop',
-            autoCropArea: 0.9,
-            cropBoxMovable: true,
-            cropBoxResizable: true,
-            toggleDragModeOnDblclick: false,
-            responsive: true,
-            guides: true,
-            center: true,
-            highlight: true,
-            background: true
+            aspectRatio: NaN, viewMode: 0, dragMode: 'crop', autoCropArea: 0.9,
+            cropBoxMovable: true, cropBoxResizable: true, toggleDragModeOnDblclick: false,
+            responsive: true, guides: true, center: true, highlight: true, background: true
         });
     }
 
@@ -713,7 +526,10 @@
         if (mode === 'free') {
             cropperInstance.setAspectRatio(NaN);
         } else {
-            const orientation = document.getElementById('inputOrientation').value;
+            // Pick orientation based on context (Add vs Edit)
+            let orientation = window.isEditingPoster ? 
+                              document.getElementById('modalEditOrientation').value : 
+                              document.getElementById('inputOrientation').value;
             const aspectRatio = orientation === 'landscape' ? (380 / 230) : (260 / 330);
             cropperInstance.setAspectRatio(aspectRatio);
         }
@@ -721,29 +537,28 @@
 
     window.applyCrop = function() {
         if (!cropperInstance) return;
-        
-        const canvas = cropperInstance.getCroppedCanvas({
-            width: 800,
-            imageSmoothingEnabled: true,
-            imageSmoothingQuality: 'high',
-        });
+        const canvas = cropperInstance.getCroppedCanvas({ width: 800, imageSmoothingEnabled: true, imageSmoothingQuality: 'high' });
+        const base64 = canvas.toDataURL('image/jpeg', 0.85);
 
-        croppedBase64Data = canvas.toDataURL('image/jpeg', 0.85);
-        
-        const previewContainer = document.getElementById('posterPreviewContainer');
-        const previewImg = document.getElementById('posterPreviewImg');
-        previewImg.src = croppedBase64Data;
-        previewContainer.style.display = 'flex';
-
+        if (window.isEditingPoster) {
+            window.editCroppedBase64Data = base64;
+            const previewContainer = document.getElementById('modalEditPosterPreviewContainer');
+            const previewImg = document.getElementById('modalEditPosterPreviewImg');
+            previewImg.src = base64;
+            previewContainer.style.display = 'flex';
+        } else {
+            croppedBase64Data = base64;
+            const previewContainer = document.getElementById('posterPreviewContainer');
+            const previewImg = document.getElementById('posterPreviewImg');
+            previewImg.src = base64;
+            previewContainer.style.display = 'flex';
+        }
         closeCropModal();
     }
 
     window.closeCropModal = function() {
         document.getElementById('cropModal').style.display = 'none';
-        if (cropperInstance) {
-            cropperInstance.destroy();
-            cropperInstance = null;
-        }
+        if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
     }
 
     async function fetchAnimeFromFirebase() {
@@ -764,6 +579,7 @@
                 if (!item.part) item.part = '';
                 if (!item.ovaType) item.ovaType = 'episodes';
                 if (!item.duration) item.duration = '';
+                if (!item.gdflix) item.gdflix = ''; // Initialize gdflix
                 animeData.push(item);
             });
             animeData.sort((a, b) => a.order - b.order);
@@ -774,73 +590,41 @@
         }
     }
 
-    window.handleDragStart = function(e, id) {
-        draggedItemId = id;
-        e.dataTransfer.setData("text/plain", id);
-        e.currentTarget.classList.add('dragging');
-    }
-
-    window.handleDragOver = function(e) {
-        e.preventDefault();
-        e.currentTarget.classList.add('drag-over');
-    }
-
-    window.handleDragLeave = function(e) {
-        e.currentTarget.classList.remove('drag-over');
-    }
-
+    // Drag and Drop
+    window.handleDragStart = function(e, id) { draggedItemId = id; e.dataTransfer.setData("text/plain", id); e.currentTarget.classList.add('dragging'); }
+    window.handleDragOver = function(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+    window.handleDragLeave = function(e) { e.currentTarget.classList.remove('drag-over'); }
     window.handleDrop = async function(e, targetId) {
-        e.preventDefault();
-        e.currentTarget.classList.remove('drag-over');
+        e.preventDefault(); e.currentTarget.classList.remove('drag-over');
         if (!draggedItemId || draggedItemId === targetId) return;
-
         let sourceItem = animeData.find(a => a.id === draggedItemId);
         let targetItem = animeData.find(a => a.id === targetId);
         if (!sourceItem || !targetItem) return;
-
-        let tempOrder = sourceItem.order;
-        sourceItem.order = targetItem.order;
-        targetItem.order = tempOrder;
-
-        if (sourceItem.category !== targetItem.category) {
-            sourceItem.category = targetItem.category;
-        }
-
+        let tempOrder = sourceItem.order; sourceItem.order = targetItem.order; targetItem.order = tempOrder;
+        if (sourceItem.category !== targetItem.category) sourceItem.category = targetItem.category;
         try {
             await updateDoc(doc(db, "animes", sourceItem.id), { order: sourceItem.order, category: sourceItem.category });
             await updateDoc(doc(db, "animes", targetItem.id), { order: targetItem.order });
             await fetchAnimeFromFirebase();
-        } catch(err) {
-            console.error("Drag Drop Error: ", err);
-        }
+        } catch(err) { console.error("Drag Drop Error: ", err); }
     }
-
-    window.handleDragEnd = function(e) {
-        e.currentTarget.classList.remove('dragging');
-        document.querySelectorAll('.anime-card').forEach(c => c.classList.remove('drag-over'));
-    }
+    window.handleDragEnd = function(e) { e.currentTarget.classList.remove('dragging'); document.querySelectorAll('.anime-card').forEach(c => c.classList.remove('drag-over')); }
 
     window.checkAdmin = function() {
-        let user = prompt("Enter Username:");
-        let pass = prompt("Enter Password:");
-
+        let user = prompt("Enter Username:"); let pass = prompt("Enter Password:");
         if (user === correctUser && pass === correctPass) {
             sessionStorage.setItem("isAdminLoggedIn", "true");
             document.getElementById('adminPanel').style.display = 'block';
             document.getElementById('mainAdminBtn').style.display = 'none';
-            alert("Login Successful!");
-            filterAndSort();
-        } else {
-            alert("Invalid Credentials!");
-        }
+            alert("Login Successful!"); filterAndSort();
+        } else { alert("Invalid Credentials!"); }
     }
 
     window.logoutAdmin = function() {
         sessionStorage.removeItem("isAdminLoggedIn");
         document.getElementById('adminPanel').style.display = 'none';
         document.getElementById('mainAdminBtn').style.display = 'block';
-        resetForm();
-        filterAndSort();
+        resetForm(); filterAndSort();
     }
 
     window.handleTypeChange = function() {
@@ -849,26 +633,13 @@
         const partContainer = document.getElementById('partContainer');
         const ovaTypeContainer = document.getElementById('ovaTypeContainer');
 
-        if (animeType === 'movie') {
-            seasonContainer.style.display = 'none';
-            partContainer.style.display = 'block';
-            ovaTypeContainer.style.display = 'none';
-        } else if (animeType === 'ova') {
-            seasonContainer.style.display = 'block';
-            partContainer.style.display = 'none';
-            ovaTypeContainer.style.display = 'block';
-        } else {
-            seasonContainer.style.display = 'block';
-            partContainer.style.display = 'none';
-            ovaTypeContainer.style.display = 'none';
-        }
+        if (animeType === 'movie') { seasonContainer.style.display = 'none'; partContainer.style.display = 'block'; ovaTypeContainer.style.display = 'none'; } 
+        else if (animeType === 'ova') { seasonContainer.style.display = 'block'; partContainer.style.display = 'none'; ovaTypeContainer.style.display = 'block'; } 
+        else { seasonContainer.style.display = 'block'; partContainer.style.display = 'none'; ovaTypeContainer.style.display = 'none'; }
         updateFormFields();
     }
 
-    window.handleOvaTypeChange = function() {
-        updateFormFields();
-    }
-
+    window.handleOvaTypeChange = function() { updateFormFields(); }
     window.updateFormFields = function() {
         const cat = document.getElementById('inputCategory').value;
         const container = document.getElementById('dynamicFields');
@@ -878,7 +649,6 @@
     function getFieldsHTML(cat, prefix = "input") {
         let animeType = document.getElementById('inputAnimeType') ? document.getElementById('inputAnimeType').value : 'series';
         let ovaType = document.getElementById('inputOvaType') ? document.getElementById('inputOvaType').value : 'episodes';
-
         let isDurationMode = (animeType === 'movie') || (animeType === 'ova' && ovaType === 'duration');
         let epOrDurationPlaceholder = isDurationMode ? "Duration (e.g. 40 Min, 1h 50m)" : "Total Episodes";
 
@@ -890,6 +660,7 @@
                 <input type="text" id="${prefix}Filepress" placeholder="FilePress Link">
                 <input type="text" id="${prefix}Appdrive" placeholder="AppDrive Link">
                 <input type="text" id="${prefix}Hubcloud" placeholder="HubCloud Link">
+                <input type="text" id="${prefix}GDflix" placeholder="GDflix Link">
                 <input type="text" id="${prefix}Link" placeholder="Other Link">
             `;
         } else if (cat === 'downloaded') {
@@ -925,22 +696,13 @@
 
     function formatSeasonText(val, animeType = 'series', part = '', ovaType = 'episodes') {
         let type = (animeType || 'series').toLowerCase();
-        if (type === 'movie') {
-            return part ? `MOVIE (PART ${part})` : `MOVIE`;
-        }
-        if (type === 'ova') {
-            let sText = val ? `OVA ${val}` : 'OVA';
-            return sText.toUpperCase();
-        }
-        if (type === 'special') {
-            return val ? `SPECIAL ${val}` : 'SPECIAL';
-        }
+        if (type === 'movie') return part ? `MOVIE (PART ${part})` : `MOVIE`;
+        if (type === 'ova') return val ? `OVA ${val}`.toUpperCase() : 'OVA';
+        if (type === 'special') return val ? `SPECIAL ${val}` : 'SPECIAL';
         if (!val) return 'SEASON 1';
         let str = val.toString().trim();
         let numOnly = str.replace(/\D/g, '');
-        if (numOnly) {
-            return `SEASON ${numOnly}`;
-        }
+        if (numOnly) return `SEASON ${numOnly}`;
         return str.toUpperCase().startsWith('SEASON') ? str.toUpperCase() : `SEASON ${str.toUpperCase()}`;
     }
 
@@ -974,48 +736,19 @@
         const orientation = document.getElementById('inputOrientation').value;
 
         if (!title) { alert('Please enter title'); return; }
-
-        let posterToUse = croppedBase64Data;
-
-        if (!posterToUse) {
-            alert('Please select and crop a poster image.');
-            return;
-        }
-
+        if (!croppedBase64Data) { alert('Please select and crop a poster image.'); return; }
         let minOrder = animeData.length > 0 ? Math.min(...animeData.map(a => a.order || Date.now())) : Date.now();
-        let orderVal = minOrder - 1;
-
-        processCardCreation(category, title, animeType, ovaType, animeCode, note, season, part, orientation, posterToUse, orderVal, false, true);
+        processCardCreation(category, title, animeType, ovaType, animeCode, note, season, part, orientation, croppedBase64Data, minOrder - 1, false, true);
     }
 
     async function processCardCreation(category, title, animeType, ovaType, animeCode, note, season, part, orientation, poster, orderVal, isPinned = false, isNew = true) {
-        let newCard = { 
-            category, 
-            title, 
-            animeType: animeType || 'series', 
-            ovaType: ovaType || 'episodes',
-            animeCode: animeCode || '', 
-            note: note || '',
-            season: season || '', 
-            part: part || '',
-            orientation, 
-            poster, 
-            order: orderVal !== undefined ? orderVal : Date.now(), 
-            isPinned: isPinned, 
-            isNew: isNew, 
-            manualLinkedIds: [] 
-        };
+        let newCard = { category, title, animeType: animeType || 'series', ovaType: ovaType || 'episodes', animeCode: animeCode || '', note: note || '', season: season || '', part: part || '', orientation, poster, order: orderVal !== undefined ? orderVal : Date.now(), isPinned, isNew, manualLinkedIds: [] };
         fillCardDataFromForm(newCard, category, "input");
-
         try {
             await addDoc(collection(db, "animes"), newCard);
             alert('Anime added successfully with NEW badge!');
-            resetForm();
-            await fetchAnimeFromFirebase();
-        } catch (error) {
-            console.error("Firebase Error: ", error);
-            alert("Error saving data!");
-        }
+            resetForm(); await fetchAnimeFromFirebase();
+        } catch (error) { console.error("Firebase Error: ", error); alert("Error saving data!"); }
     }
 
     function fillCardDataFromForm(cardObj, category, prefix) {
@@ -1026,6 +759,7 @@
             cardObj.filepress = document.getElementById(prefix + 'Filepress').value;
             cardObj.appdrive = document.getElementById(prefix + 'Appdrive').value;
             cardObj.hubcloud = document.getElementById(prefix + 'Hubcloud').value;
+            cardObj.gdflix = document.getElementById(prefix + 'GDflix') ? document.getElementById(prefix + 'GDflix').value : '';
             cardObj.link = document.getElementById(prefix + 'Link').value;
         } else if (category === 'downloaded') {
             cardObj.usbDrive = document.getElementById(prefix + 'UsbDrive').value;
@@ -1047,8 +781,7 @@
     }
 
     window.resetForm = function() {
-        editingId = null;
-        croppedBase64Data = null;
+        editingId = null; croppedBase64Data = null; window.editCroppedBase64Data = null;
         document.getElementById('panelTitle').innerText = "Add New Anime Card";
         document.getElementById('saveCardBtn').innerText = "Add Anime Card to List";
         document.getElementById('cancelEditBtn').style.display = 'none';
@@ -1064,157 +797,81 @@
         document.getElementById('posterPreviewContainer').style.display = 'none';
         document.getElementById('posterPreviewImg').src = '';
         document.getElementById('inputCategory').value = 'download';
-        handleTypeChange();
-        updateFormFields();
+        handleTypeChange(); updateFormFields();
     }
 
+    // Modal UI functions
     window.toggleCardMenu = function(id, event) {
         event.stopPropagation();
-        let allMenus = document.querySelectorAll('.dropdown-menu');
-        allMenus.forEach((menu) => { 
-            if (menu.id !== 'menu-' + id) menu.style.display = 'none'; 
-        });
+        document.querySelectorAll('.dropdown-menu').forEach((menu) => { if (menu.id !== 'menu-' + id) menu.style.display = 'none'; });
         let menu = document.getElementById('menu-' + id);
-        if (menu) {
-            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-        }
+        if (menu) menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
     }
-
-    window.onclick = function() {
-        let allMenus = document.querySelectorAll('.dropdown-menu');
-        allMenus.forEach(menu => menu.style.display = 'none');
-    };
+    window.onclick = function() { document.querySelectorAll('.dropdown-menu').forEach(menu => menu.style.display = 'none'); };
 
     window.togglePinCard = async function(id) {
-        let currentItem = animeData.find(a => a.id === id);
-        if (!currentItem) return;
-
-        let newPinState = !currentItem.isPinned;
-        try {
-            await updateDoc(doc(db, "animes", id), { isPinned: newPinState });
-            await fetchAnimeFromFirebase();
-        } catch (err) {
-            console.error(err);
-            alert("Error Toggling Pin!");
-        }
+        let item = animeData.find(a => a.id === id); if (!item) return;
+        try { await updateDoc(doc(db, "animes", id), { isPinned: !item.isPinned }); await fetchAnimeFromFirebase(); } catch (err) { alert("Error!"); }
     }
-
     window.toggleNewCard = async function(id) {
-        let currentItem = animeData.find(a => a.id === id);
-        if (!currentItem) return;
-
-        let newBadgeState = !currentItem.isNew;
-        try {
-            await updateDoc(doc(db, "animes", id), { isNew: newBadgeState });
-            await fetchAnimeFromFirebase();
-        } catch (err) {
-            console.error(err);
-            alert("Error Toggling NEW Badge!");
-        }
+        let item = animeData.find(a => a.id === id); if (!item) return;
+        try { await updateDoc(doc(db, "animes", id), { isNew: !item.isNew }); await fetchAnimeFromFirebase(); } catch (err) { alert("Error!"); }
     }
 
+    // Bulk New
     window.openBulkNewModal = function() {
-        let listContainer = document.getElementById('bulkAnimeList');
-        listContainer.innerHTML = '';
-        
+        let listContainer = document.getElementById('bulkAnimeList'); listContainer.innerHTML = '';
         animeData.forEach(item => {
             let sText = item.season || item.part ? ` (${formatSeasonText(item.season, item.animeType, item.part, item.ovaType)})` : '';
-            let isChecked = item.isNew ? 'checked' : '';
             let newBadgeText = item.isNew ? '<b style="color:#22c55e;">[NEW]</b>' : '';
-            let typeLabel = item.animeType ? item.animeType.toUpperCase() : 'SERIES';
-            
             listContainer.innerHTML += `
                 <div class="bulk-item">
-                    <input type="checkbox" class="bulk-checkbox" value="${item.id}" ${isChecked}>
-                    <span style="font-size:0.85rem; font-weight:bold;">${item.title}${sText} ${newBadgeText} <i style="color:#ec4899; font-size:0.75rem;">[${typeLabel}]</i> <i style="color:#38bdf8; font-size:0.75rem;">(${item.category})</i></span>
+                    <input type="checkbox" class="bulk-checkbox" value="${item.id}" ${item.isNew ? 'checked' : ''}>
+                    <span style="font-size:0.85rem; font-weight:bold;">${item.title}${sText} ${newBadgeText} <i style="color:#ec4899; font-size:0.75rem;">[${item.animeType ? item.animeType.toUpperCase() : 'SERIES'}]</i> <i style="color:#38bdf8; font-size:0.75rem;">(${item.category})</i></span>
                 </div>
             `;
         });
-        
         document.getElementById('bulkNewModal').style.display = 'flex';
     }
-
-    window.closeBulkNewModal = function() {
-        document.getElementById('bulkNewModal').style.display = 'none';
-    }
-
-    window.toggleSelectAllBulk = function(selectAll) {
-        let checkboxes = document.querySelectorAll('.bulk-checkbox');
-        checkboxes.forEach(cb => cb.checked = selectAll);
-    }
-
+    window.closeBulkNewModal = function() { document.getElementById('bulkNewModal').style.display = 'none'; }
+    window.toggleSelectAllBulk = function(selectAll) { document.querySelectorAll('.bulk-checkbox').forEach(cb => cb.checked = selectAll); }
     window.submitBulkNewState = async function(turnOn) {
         let checkboxes = document.querySelectorAll('.bulk-checkbox:checked');
         let selectedIds = Array.from(checkboxes).map(cb => cb.value);
-
-        if (selectedIds.length === 0) {
-            alert("Please select at least one anime.");
-            return;
-        }
-
+        if (selectedIds.length === 0) { alert("Please select at least one anime."); return; }
         try {
-            for (let id of selectedIds) {
-                await updateDoc(doc(db, "animes", id), { isNew: turnOn });
-            }
-            alert(`Successfully updated NEW badge for ${selectedIds.length} anime(s)!`);
-            closeBulkNewModal();
-            await fetchAnimeFromFirebase();
-        } catch (err) {
-            console.error(err);
-            alert("Error updating bulk badges!");
-        }
+            for (let id of selectedIds) await updateDoc(doc(db, "animes", id), { isNew: turnOn });
+            alert(`Successfully updated NEW badge for ${selectedIds.length} anime(s)!`); closeBulkNewModal(); await fetchAnimeFromFirebase();
+        } catch (err) { alert("Error!"); }
     }
 
+    // Move Section
     window.moveOrderById = async function(cardId, direction) {
-        let currentItem = animeData.find(a => a.id === cardId);
-        if (!currentItem) return;
-
-        let catItems = animeData.filter(a => a.category === currentItem.category && !!a.isPinned === !!currentItem.isPinned);
+        let item = animeData.find(a => a.id === cardId); if (!item) return;
+        let catItems = animeData.filter(a => a.category === item.category && !!a.isPinned === !!item.isPinned);
         catItems.sort((a, b) => a.order - b.order);
-
         let currentIndex = catItems.findIndex(a => a.id === cardId);
         let targetIndex = currentIndex + direction;
-
         if (targetIndex < 0 || targetIndex >= catItems.length) return;
-
         let targetItem = catItems[targetIndex];
-
-        let tempOrder = currentItem.order;
-        currentItem.order = targetItem.order;
-        targetItem.order = tempOrder;
-
+        let tempOrder = item.order; item.order = targetItem.order; targetItem.order = tempOrder;
         try {
-            await updateDoc(doc(db, "animes", currentItem.id), { order: currentItem.order });
+            await updateDoc(doc(db, "animes", item.id), { order: item.order });
             await updateDoc(doc(db, "animes", targetItem.id), { order: targetItem.order });
             await fetchAnimeFromFirebase();
-        } catch (err) {
-            console.error(err);
-            alert("Error updating order!");
-        }
+        } catch (err) { alert("Error!"); }
     }
-
     window.openMoveModal = function(id) {
-        movingId = id;
-        let item = animeData.find(a => a.id === id);
-        if(!item) return;
+        movingId = id; let item = animeData.find(a => a.id === id); if(!item) return;
         document.getElementById('moveCategorySelect').value = item.category === 'ongoing' ? 'download' : (item.category === 'download' ? 'downloaded' : (item.category === 'downloaded' ? 'watching' : 'completed'));
-        updateMoveFields();
-        document.getElementById('moveModal').style.display = 'flex';
+        updateMoveFields(); document.getElementById('moveModal').style.display = 'flex';
     }
-
-    window.closeMoveModal = function() {
-        document.getElementById('moveModal').style.display = 'none';
-        movingId = null;
-    }
-
+    window.closeMoveModal = function() { document.getElementById('moveModal').style.display = 'none'; movingId = null; }
     window.updateMoveFields = function() {
         const targetCat = document.getElementById('moveCategorySelect').value;
-        const container = document.getElementById('moveDynamicFields');
-        container.innerHTML = getFieldsHTML(targetCat, "moveInput");
-        
+        document.getElementById('moveDynamicFields').innerHTML = getFieldsHTML(targetCat, "moveInput");
         if (movingId !== null) {
-            let item = animeData.find(a => a.id === movingId);
-            if (!item) return;
+            let item = animeData.find(a => a.id === movingId); if (!item) return;
             setTimeout(() => {
                 if (document.getElementById('moveInputEpisodes')) document.getElementById('moveInputEpisodes').value = item.episodes || '';
                 if (document.getElementById('moveInputTotalEp')) document.getElementById('moveInputTotalEp').value = item.totalEp || item.episodes || '';
@@ -1224,78 +881,46 @@
             }, 50);
         }
     }
-
     window.submitMoveCard = async function() {
-        if (movingId === null) return;
-        let item = animeData.find(a => a.id === movingId);
-        if(!item) return;
+        if (movingId === null) return; let item = animeData.find(a => a.id === movingId); if(!item) return;
         let newCategory = document.getElementById('moveCategorySelect').value;
-        
-        let updatedCard = {
-            title: item.title,
-            animeType: item.animeType || 'series',
-            ovaType: item.ovaType || 'episodes',
-            animeCode: item.animeCode || '',
-            note: item.note || '',
-            season: item.season || '',
-            part: item.part || '',
-            orientation: item.orientation || 'portrait',
-            poster: item.poster,
-            category: newCategory,
-            order: item.order || Date.now(),
-            isPinned: item.isPinned || false,
-            isNew: item.isNew || false,
-            manualLinkedIds: item.manualLinkedIds || []
-        };
-
+        let updatedCard = { ...item, category: newCategory };
         fillCardDataFromForm(updatedCard, newCategory, "moveInput");
-
         try {
             await updateDoc(doc(db, "animes", item.id), updatedCard);
-            alert(`Moved to ${newCategory} successfully!`);
-            closeMoveModal();
-            await fetchAnimeFromFirebase();
-        } catch (error) {
-            console.error("Move error:", error);
-            alert("Error moving card!");
-        }
+            alert(`Moved successfully!`); closeMoveModal(); await fetchAnimeFromFirebase();
+        } catch (error) { alert("Error moving card!"); }
     }
 
+    // FULL EDIT MODAL (Updated)
     window.handleModalEditTypeChange = function() {
         let type = document.getElementById('modalEditAnimeType').value;
-        let seasonCont = document.getElementById('modalEditSeasonContainer');
-        let partCont = document.getElementById('modalEditPartContainer');
-        let ovaCont = document.getElementById('modalEditOvaContainer');
-
-        if (type === 'movie') {
-            seasonCont.style.display = 'none';
-            partCont.style.display = 'block';
-            ovaCont.style.display = 'none';
-        } else if (type === 'ova') {
-            seasonCont.style.display = 'block';
-            partCont.style.display = 'none';
-            ovaCont.style.display = 'block';
-        } else {
-            seasonCont.style.display = 'block';
-            partCont.style.display = 'none';
-            ovaCont.style.display = 'none';
-        }
+        document.getElementById('modalEditSeasonContainer').style.display = type === 'movie' ? 'none' : 'block';
+        document.getElementById('modalEditPartContainer').style.display = type === 'movie' ? 'block' : 'none';
+        document.getElementById('modalEditOvaContainer').style.display = type === 'ova' ? 'block' : 'none';
     }
-
     window.openEditModal = function(id) {
-        let item = animeData.find(a => a.id === id);
-        if (!item) return;
+        let item = animeData.find(a => a.id === id); if (!item) return;
         editingId = item.id;
         
+        // Reset and Prep
+        window.editCroppedBase64Data = null;
+        document.getElementById('modalEditPosterFile').value = '';
+        document.getElementById('modalEditPosterPreviewContainer').style.display = 'none';
+
+        // Bind Old Data
+        document.getElementById('modalEditCategory').value = item.category || 'download';
         document.getElementById('modalEditTitle').value = item.title || '';
         document.getElementById('modalEditAnimeType').value = item.animeType || 'series';
         document.getElementById('modalEditOvaType').value = item.ovaType || 'episodes';
         document.getElementById('modalEditSeason').value = item.season || '';
         document.getElementById('modalEditPart').value = item.part || '';
         document.getElementById('modalEditEpisodes').value = item.episodes || item.totalEp || '';
+        document.getElementById('modalEditQuality').value = item.quality || '';
         document.getElementById('modalEditFilepress').value = item.filepress || '';
         document.getElementById('modalEditAppdrive').value = item.appdrive || '';
         document.getElementById('modalEditHubcloud').value = item.hubcloud || '';
+        document.getElementById('modalEditGDflix').value = item.gdflix || '';
         document.getElementById('modalEditLink').value = item.link || '';
         document.getElementById('modalEditNote').value = item.note || '';
         document.getElementById('modalEditCode').value = item.animeCode || '';
@@ -1304,109 +929,71 @@
         handleModalEditTypeChange();
         document.getElementById('editModal').style.display = 'flex';
     }
-
-    window.closeEditModal = function() {
-        document.getElementById('editModal').style.display = 'none';
-        editingId = null;
-    }
-
+    window.closeEditModal = function() { document.getElementById('editModal').style.display = 'none'; editingId = null; }
+    
     window.saveModalEdit = async function() {
         if (editingId === null) return;
         let newTitle = document.getElementById('modalEditTitle').value;
-        let newAnimeType = document.getElementById('modalEditAnimeType').value;
-        let newOvaType = document.getElementById('modalEditOvaType').value;
-        let newSeason = document.getElementById('modalEditSeason').value;
-        let newPart = document.getElementById('modalEditPart').value;
-        let newEpisodes = document.getElementById('modalEditEpisodes').value;
-        let newFilepress = document.getElementById('modalEditFilepress').value;
-        let newAppdrive = document.getElementById('modalEditAppdrive').value;
-        let newHubcloud = document.getElementById('modalEditHubcloud').value;
-        let newLink = document.getElementById('modalEditLink').value;
-        let newNote = document.getElementById('modalEditNote').value;
-        let newCode = document.getElementById('modalEditCode').value;
-        let newOrientation = document.getElementById('modalEditOrientation').value;
-
-        if (!newTitle) {
-            alert("Title cannot be empty!");
-            return;
-        }
+        if (!newTitle) { alert("Title cannot be empty!"); return; }
 
         let currentItem = animeData.find(a => a.id === editingId);
+        
         let updatePayload = {
+            category: document.getElementById('modalEditCategory').value,
             title: newTitle,
-            animeType: newAnimeType,
-            ovaType: newOvaType,
-            season: newSeason,
-            part: newPart,
-            episodes: newEpisodes,
-            filepress: newFilepress,
-            appdrive: newAppdrive,
-            hubcloud: newHubcloud,
-            link: newLink,
-            note: newNote,
-            animeCode: newCode,
-            orientation: newOrientation
+            animeType: document.getElementById('modalEditAnimeType').value,
+            ovaType: document.getElementById('modalEditOvaType').value,
+            season: document.getElementById('modalEditSeason').value,
+            part: document.getElementById('modalEditPart').value,
+            episodes: document.getElementById('modalEditEpisodes').value,
+            quality: document.getElementById('modalEditQuality').value,
+            filepress: document.getElementById('modalEditFilepress').value,
+            appdrive: document.getElementById('modalEditAppdrive').value,
+            hubcloud: document.getElementById('modalEditHubcloud').value,
+            gdflix: document.getElementById('modalEditGDflix').value,
+            link: document.getElementById('modalEditLink').value,
+            note: document.getElementById('modalEditNote').value,
+            animeCode: document.getElementById('modalEditCode').value,
+            orientation: document.getElementById('modalEditOrientation').value
         };
 
+        if (window.editCroppedBase64Data) {
+            updatePayload.poster = window.editCroppedBase64Data;
+        }
+
         if (currentItem && currentItem.category === 'watching' || currentItem && currentItem.category === 'completed') {
-            updatePayload.totalEp = newEpisodes;
+            updatePayload.totalEp = updatePayload.episodes;
         }
 
         try {
             await updateDoc(doc(db, "animes", editingId), updatePayload);
             alert("Anime Info, Links & Episodes Updated Successfully!");
-            closeEditModal();
-            await fetchAnimeFromFirebase();
-        } catch (err) {
-            console.error(err);
-            alert("Error updating info!");
-        }
+            closeEditModal(); await fetchAnimeFromFirebase();
+        } catch (err) { alert("Error updating info!"); }
     }
 
+    // Linked Seasons logic
     window.openSeasonsModal = function(id) {
-        let currentItem = animeData.find(a => a.id === id);
-        if(!currentItem) return;
-        activeSeasonAnimeId = currentItem.id;
-        document.getElementById('seasonModalTitle').innerText = `Manage Seasons & OVAs for "${currentItem.title}"`;
-        renderSeasonsManager();
-        document.getElementById('seasonsModal').style.display = 'flex';
+        let item = animeData.find(a => a.id === id); if(!item) return;
+        activeSeasonAnimeId = item.id;
+        document.getElementById('seasonModalTitle').innerText = `Manage Seasons & OVAs for "${item.title}"`;
+        renderSeasonsManager(); document.getElementById('seasonsModal').style.display = 'flex';
     }
-
-    window.closeSeasonsModal = function() {
-        document.getElementById('seasonsModal').style.display = 'none';
-        activeSeasonAnimeId = null;
-        fetchAnimeFromFirebase();
-    }
+    window.closeSeasonsModal = function() { document.getElementById('seasonsModal').style.display = 'none'; activeSeasonAnimeId = null; fetchAnimeFromFirebase(); }
 
     function renderSeasonsManager() {
-        let currentItem = animeData.find(a => a.id === activeSeasonAnimeId);
-        if (!currentItem) return;
-
-        let container = document.getElementById('connectedSeasonsList');
-        container.innerHTML = '';
-
+        let currentItem = animeData.find(a => a.id === activeSeasonAnimeId); if (!currentItem) return;
+        let container = document.getElementById('connectedSeasonsList'); container.innerHTML = '';
         let manualLinks = currentItem.manualLinkedIds || [];
-        let relatedSeasons = animeData.filter(a => 
-            a.id !== currentItem.id && 
-            (a.title.trim().toLowerCase() === currentItem.title.trim().toLowerCase() || manualLinks.includes(a.id))
-        );
+        let relatedSeasons = animeData.filter(a => a.id !== currentItem.id && (a.title.trim().toLowerCase() === currentItem.title.trim().toLowerCase() || manualLinks.includes(a.id)));
+        
+        if (manualLinks.length > 0) relatedSeasons.sort((a, b) => { let idxA = manualLinks.indexOf(a.id); let idxB = manualLinks.indexOf(b.id); if (idxA !== -1 && idxB !== -1) return idxA - idxB; return a.order - b.order; });
 
-        if (manualLinks.length > 0) {
-            relatedSeasons.sort((a, b) => {
-                let idxA = manualLinks.indexOf(a.id);
-                let idxB = manualLinks.indexOf(b.id);
-                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-                return a.order - b.order;
-            });
-        }
-
-        if (relatedSeasons.length === 0) {
-            container.innerHTML = `<p style="color: #94a3b8; font-size: 0.85rem;">No other seasons/movies/OVAs linked currently.</p>`;
-        } else {
-            relatedSeasons.forEach((rel, index) => {
+        if (relatedSeasons.length === 0) { container.innerHTML = `<p style="color: #94a3b8; font-size: 0.85rem;">No other seasons/movies/OVAs linked currently.</p>`; } 
+        else {
+            relatedSeasons.forEach((rel) => {
                 let sName = formatSeasonText(rel.season, rel.animeType, rel.part, rel.ovaType);
-                let div = document.createElement('div');
-                div.className = 'season-list-item';
+                let div = document.createElement('div'); div.className = 'season-list-item';
                 div.innerHTML = `
                     <span style="font-size: 0.85rem; font-weight: bold;">${rel.title} (${sName}) - <i style="color: #38bdf8;">${rel.category}</i></span>
                     <div class="season-action-group">
@@ -1414,318 +1001,122 @@
                         <button class="order-btn" onclick="shiftLinkedSeasonOrder('${rel.id}', 1)">⬇️ Down</button>
                         <button class="remove-season-btn" id="remBtn-${rel.id}" onclick="showRemoveConfirmBtn('${rel.id}')">Remove Link</button>
                         <button class="remove-season-btn confirm-remove-btn" id="confBtn-${rel.id}" style="display:none;" onclick="unlinkSeason('${rel.id}')">Confirm Remove</button>
-                    </div>
-                `;
+                    </div>`;
                 container.appendChild(div);
             });
         }
-
-        let selectDropdown = document.getElementById('seasonLinkSelect');
-        selectDropdown.innerHTML = `<option value="">-- Tap & Select Anime / OVA --</option>`;
-        animeData.filter(a => a.id !== currentItem.id).forEach(a => {
-            let sText = formatSeasonText(a.season, a.animeType, a.part, a.ovaType);
-            selectDropdown.innerHTML += `<option value="${a.id}">${a.title} [${sText}] (${a.category})</option>`;
-        });
+        let selectDropdown = document.getElementById('seasonLinkSelect'); selectDropdown.innerHTML = `<option value="">-- Tap & Select Anime / OVA --</option>`;
+        animeData.filter(a => a.id !== currentItem.id).forEach(a => { selectDropdown.innerHTML += `<option value="${a.id}">${a.title} [${formatSeasonText(a.season, a.animeType, a.part, a.ovaType)}] (${a.category})</option>`; });
     }
 
     window.shiftLinkedSeasonOrder = async function(targetId, direction) {
-        let currentItem = animeData.find(a => a.id === activeSeasonAnimeId);
-        if (!currentItem) return;
-
+        let currentItem = animeData.find(a => a.id === activeSeasonAnimeId); if (!currentItem) return;
         let links = currentItem.manualLinkedIds || [];
-        if (!links.includes(targetId)) {
-            let related = animeData.filter(a => 
-                a.id !== currentItem.id && 
-                (a.title.trim().toLowerCase() === currentItem.title.trim().toLowerCase() || links.includes(a.id))
-            );
-            links = related.map(r => r.id);
-        }
-
-        let index = links.indexOf(targetId);
-        if (index === -1) return;
-
-        let newIndex = index + direction;
-        if (newIndex < 0 || newIndex >= links.length) return;
-
-        let temp = links[index];
-        links[index] = links[newIndex];
-        links[newIndex] = temp;
-
-        currentItem.manualLinkedIds = links;
-
-        try {
-            await updateDoc(doc(db, "animes", activeSeasonAnimeId), { manualLinkedIds: links });
-            renderSeasonsManager();
-        } catch (err) {
-            console.error(err);
-        }
+        if (!links.includes(targetId)) { links = animeData.filter(a => a.id !== currentItem.id && (a.title.trim().toLowerCase() === currentItem.title.trim().toLowerCase() || links.includes(a.id))).map(r => r.id); }
+        let index = links.indexOf(targetId); if (index === -1) return;
+        let newIndex = index + direction; if (newIndex < 0 || newIndex >= links.length) return;
+        let temp = links[index]; links[index] = links[newIndex]; links[newIndex] = temp; currentItem.manualLinkedIds = links;
+        try { await updateDoc(doc(db, "animes", activeSeasonAnimeId), { manualLinkedIds: links }); renderSeasonsManager(); } catch (err) { alert("Error!"); }
     }
-
     window.showRemoveConfirmBtn = function(targetId) {
-        let remBtn = document.getElementById(`remBtn-${targetId}`);
-        let confBtn = document.getElementById(`confBtn-${targetId}`);
-        if (remBtn && confBtn) {
-            remBtn.style.display = 'none';
-            confBtn.style.display = 'inline-block';
-            setTimeout(() => {
-                if (remBtn && confBtn && confBtn.style.display !== 'none') {
-                    confBtn.style.display = 'none';
-                    remBtn.style.display = 'inline-block';
-                }
-            }, 4000);
-        }
+        let remBtn = document.getElementById(`remBtn-${targetId}`); let confBtn = document.getElementById(`confBtn-${targetId}`);
+        if (remBtn && confBtn) { remBtn.style.display = 'none'; confBtn.style.display = 'inline-block'; setTimeout(() => { if (remBtn && confBtn && confBtn.style.display !== 'none') { confBtn.style.display = 'none'; remBtn.style.display = 'inline-block'; } }, 4000); }
     }
-
     window.unlinkSeason = async function(targetId) {
-        let currentItem = animeData.find(a => a.id === activeSeasonAnimeId);
-        let targetItem = animeData.find(a => a.id === targetId);
-
+        let currentItem = animeData.find(a => a.id === activeSeasonAnimeId); let targetItem = animeData.find(a => a.id === targetId);
         let currentLinks = (currentItem.manualLinkedIds || []).filter(id => id !== targetId);
         let targetLinks = targetItem ? (targetItem.manualLinkedIds || []).filter(id => id !== activeSeasonAnimeId) : [];
-
-        try {
-            await updateDoc(doc(db, "animes", activeSeasonAnimeId), { manualLinkedIds: currentLinks });
-            if (targetItem) {
-                await updateDoc(doc(db, "animes", targetId), { manualLinkedIds: targetLinks });
-            }
-            currentItem.manualLinkedIds = currentLinks;
-            renderSeasonsManager();
-        } catch (err) {
-            console.error(err);
-        }
+        try { await updateDoc(doc(db, "animes", activeSeasonAnimeId), { manualLinkedIds: currentLinks }); if (targetItem) await updateDoc(doc(db, "animes", targetId), { manualLinkedIds: targetLinks }); currentItem.manualLinkedIds = currentLinks; renderSeasonsManager(); } catch (err) { alert("Error!"); }
     }
-
     window.linkNewSeason = async function() {
-        let selectedId = document.getElementById('seasonLinkSelect').value;
-        if (!selectedId || !activeSeasonAnimeId) { alert("Please select an anime first."); return; }
-
-        let currentItem = animeData.find(a => a.id === activeSeasonAnimeId);
-        let targetItem = animeData.find(a => a.id === selectedId);
-
-        let currentLinks = currentItem.manualLinkedIds || [];
-        let targetLinks = targetItem.manualLinkedIds || [];
-
-        if (!currentLinks.includes(selectedId)) currentLinks.push(selectedId);
-        if (!targetLinks.includes(activeSeasonAnimeId)) targetLinks.push(activeSeasonAnimeId);
-
-        try {
-            await updateDoc(doc(db, "animes", activeSeasonAnimeId), { manualLinkedIds: currentLinks });
-            await updateDoc(doc(db, "animes", selectedId), { manualLinkedIds: targetLinks });
-            currentItem.manualLinkedIds = currentLinks;
-            renderSeasonsManager();
-            alert("Season / OVA successfully linked!");
-        } catch (err) {
-            console.error(err);
-        }
+        let selectedId = document.getElementById('seasonLinkSelect').value; if (!selectedId || !activeSeasonAnimeId) return;
+        let currentItem = animeData.find(a => a.id === activeSeasonAnimeId); let targetItem = animeData.find(a => a.id === selectedId);
+        let currentLinks = currentItem.manualLinkedIds || []; let targetLinks = targetItem.manualLinkedIds || [];
+        if (!currentLinks.includes(selectedId)) currentLinks.push(selectedId); if (!targetLinks.includes(activeSeasonAnimeId)) targetLinks.push(activeSeasonAnimeId);
+        try { await updateDoc(doc(db, "animes", activeSeasonAnimeId), { manualLinkedIds: currentLinks }); await updateDoc(doc(db, "animes", selectedId), { manualLinkedIds: targetLinks }); currentItem.manualLinkedIds = currentLinks; renderSeasonsManager(); alert("Linked!"); } catch (err) { alert("Error!"); }
     }
-
     window.quickAddNewSeason = async function() {
-        let seasonNum = document.getElementById('quickSeasonNum').value;
-        if (!seasonNum || !activeSeasonAnimeId) { alert("Please enter season number."); return; }
-
-        let parentAnime = animeData.find(a => a.id === activeSeasonAnimeId);
-        if (!parentAnime) return;
-
+        let seasonNum = document.getElementById('quickSeasonNum').value; if (!seasonNum || !activeSeasonAnimeId) return;
+        let pAnime = animeData.find(a => a.id === activeSeasonAnimeId); if (!pAnime) return;
         let minOrder = animeData.length > 0 ? Math.min(...animeData.map(a => a.order || Date.now())) : Date.now();
-
-        let newCard = {
-            title: parentAnime.title,
-            animeType: parentAnime.animeType || 'series',
-            ovaType: parentAnime.ovaType || 'episodes',
-            animeCode: parentAnime.animeCode || '',
-            note: parentAnime.note || '',
-            season: seasonNum,
-            part: '',
-            orientation: parentAnime.orientation || 'portrait',
-            poster: parentAnime.poster,
-            category: parentAnime.category,
-            order: minOrder - 1,
-            isPinned: false,
-            isNew: true,
-            manualLinkedIds: [activeSeasonAnimeId]
-        };
-
-        try {
-            let docRef = await addDoc(collection(db, "animes"), newCard);
-            let parentLinks = parentAnime.manualLinkedIds || [];
-            parentLinks.push(docRef.id);
-            await updateDoc(doc(db, "animes", activeSeasonAnimeId), { manualLinkedIds: parentLinks });
-            
-            document.getElementById('quickSeasonNum').value = '';
-            await fetchAnimeFromFirebase();
-            renderSeasonsManager();
-            alert(`Season ${seasonNum} added successfully & linked!`);
-        } catch (err) {
-            console.error(err);
-            alert("Error adding quick season!");
-        }
+        let newCard = { title: pAnime.title, animeType: pAnime.animeType || 'series', ovaType: pAnime.ovaType || 'episodes', animeCode: pAnime.animeCode || '', note: pAnime.note || '', season: seasonNum, part: '', orientation: pAnime.orientation || 'portrait', poster: pAnime.poster, category: pAnime.category, order: minOrder - 1, isPinned: false, isNew: true, manualLinkedIds: [activeSeasonAnimeId] };
+        try { let docRef = await addDoc(collection(db, "animes"), newCard); let pLinks = pAnime.manualLinkedIds || []; pLinks.push(docRef.id); await updateDoc(doc(db, "animes", activeSeasonAnimeId), { manualLinkedIds: pLinks }); document.getElementById('quickSeasonNum').value = ''; await fetchAnimeFromFirebase(); renderSeasonsManager(); alert("Added!"); } catch (err) { alert("Error!"); }
     }
 
-    window.editCard = function(id) {
-        openEditModal(id);
-    }
-
-    window.deleteCard = async function(id) {
-        if (confirm("Delete this anime?")) {
-            try {
-                await deleteDoc(doc(db, "animes", id));
-                await fetchAnimeFromFirebase();
-            } catch (error) { console.error(error); }
-        }
-    }
-
-    window.cloneCard = async function(id) {
-        let item = animeData.find(a => a.id === id);
-        if(!item) return;
-        let clonedItem = JSON.parse(JSON.stringify(item));
-        delete clonedItem.id;
-        clonedItem.title += " (Copy)";
-        let minOrder = animeData.length > 0 ? Math.min(...animeData.map(a => a.order || Date.now())) : Date.now();
-        clonedItem.order = minOrder - 1;
-        await addDoc(collection(db, "animes"), clonedItem);
-        await fetchAnimeFromFirebase();
-    }
-
-    window.shareCard = function(id) {
-        let item = animeData.find(a => a.id === id);
-        if(!item) return;
-        let shareText = `Check out ${item.title} ${item.season || item.part ? '(' + formatSeasonText(item.season, item.animeType, item.part, item.ovaType) + ')' : ''}!`;
-        if (navigator.share) { navigator.share({ title: item.title, text: shareText }); } 
-        else { prompt("Copy details:", shareText); }
-    }
+    window.editCard = function(id) { openEditModal(id); }
+    window.deleteCard = async function(id) { if (confirm("Delete this anime?")) { try { await deleteDoc(doc(db, "animes", id)); await fetchAnimeFromFirebase(); } catch (error) { console.error(error); } } }
+    window.cloneCard = async function(id) { let item = animeData.find(a => a.id === id); if(!item) return; let clonedItem = JSON.parse(JSON.stringify(item)); delete clonedItem.id; clonedItem.title += " (Copy)"; let minOrder = animeData.length > 0 ? Math.min(...animeData.map(a => a.order || Date.now())) : Date.now(); clonedItem.order = minOrder - 1; await addDoc(collection(db, "animes"), clonedItem); await fetchAnimeFromFirebase(); }
+    window.shareCard = function(id) { let item = animeData.find(a => a.id === id); if(!item) return; let shareText = `Check out ${item.title} ${item.season || item.part ? '(' + formatSeasonText(item.season, item.animeType, item.part, item.ovaType) + ')' : ''}!`; if (navigator.share) { navigator.share({ title: item.title, text: shareText }); } else { prompt("Copy details:", shareText); } }
 
     window.jumpToSeason = function(selectElem, targetId) {
         if (!targetId) return;
-        
-        let cardElement = document.getElementById("card-" + targetId);
-        let overlay = document.getElementById('spotlightOverlay');
-
+        let cardElement = document.getElementById("card-" + targetId); let overlay = document.getElementById('spotlightOverlay');
         if (cardElement) {
             cardElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-            if (overlay) overlay.style.display = 'block';
-
-            cardElement.classList.add('spotlight-active');
-
-            let pointerBadge = document.createElement('div');
-            pointerBadge.className = 'season-pointer-badge';
-            pointerBadge.innerHTML = '👇 TARGET ITEM HERE';
-            pointerBadge.id = 'activePointerBadge';
-            cardElement.appendChild(pointerBadge);
-
-            setTimeout(() => {
-                cardElement.classList.remove('spotlight-active');
-                if (overlay) overlay.style.display = 'none';
-                let existingPointer = document.getElementById('activePointerBadge');
-                if (existingPointer) existingPointer.remove();
-            }, 2500);
+            if (overlay) overlay.style.display = 'block'; cardElement.classList.add('spotlight-active');
+            let pointerBadge = document.createElement('div'); pointerBadge.className = 'season-pointer-badge'; pointerBadge.innerHTML = '👇 TARGET ITEM HERE'; pointerBadge.id = 'activePointerBadge'; cardElement.appendChild(pointerBadge);
+            setTimeout(() => { cardElement.classList.remove('spotlight-active'); if (overlay) overlay.style.display = 'none'; let existingPointer = document.getElementById('activePointerBadge'); if (existingPointer) existingPointer.remove(); }, 2500);
         }
-
-        if (selectElem) {
-            selectElem.value = "";
-        }
+        if (selectElem) selectElem.value = "";
     }
 
     window.openAnimeDetailModal = function(id, event) {
-        if (event) {
-            let target = event.target;
-            if (target.closest('.link-btn') || 
-                target.closest('.ongoing-btn') || 
-                target.closest('.other-seasons-select') || 
-                target.closest('.card-menu-container') || 
-                target.closest('.dots-btn')) {
-                return;
-            }
-        }
-
-        let item = animeData.find(a => a.id === id);
-        if (!item) return;
+        if (event) { let target = event.target; if (target.closest('.link-btn') || target.closest('.ongoing-btn') || target.closest('.other-seasons-select') || target.closest('.card-menu-container') || target.closest('.dots-btn')) return; }
+        let item = animeData.find(a => a.id === id); if (!item) return;
 
         document.getElementById('detailPosterImg').src = item.poster;
         document.getElementById('detailTitle').innerText = item.title;
-
-        let badgesContainer = document.getElementById('detailBadgesContainer');
-        let codeContainer = document.getElementById('detailCodeContainer');
-        
-        badgesContainer.innerHTML = '';
-        codeContainer.innerHTML = '';
-
+        let badgesContainer = document.getElementById('detailBadgesContainer'); let codeContainer = document.getElementById('detailCodeContainer');
+        badgesContainer.innerHTML = ''; codeContainer.innerHTML = '';
         badgesContainer.innerHTML += renderTypeBadge(item.animeType);
         if (item.isPinned) badgesContainer.innerHTML += `<div class="pin-badge">📌 PINNED</div>`;
         if (item.isNew) badgesContainer.innerHTML += `<div class="new-badge">NEW</div>`;
         if (item.animeCode) codeContainer.innerHTML = `<div class="anime-code-badge">${item.animeCode}</div>`;
 
         document.getElementById('detailTypeValue').innerText = (item.animeType || 'series').toUpperCase();
+        document.getElementById('detailSeasonValue').innerText = formatSeasonText(item.season, item.animeType, item.part, item.ovaType);
 
-        let seasonVal = formatSeasonText(item.season, item.animeType, item.part, item.ovaType);
-        document.getElementById('detailSeasonValue').innerText = seasonVal;
-
-        let epRow = document.getElementById('detailEpRow');
-        let qualRow = document.getElementById('detailQualityRow');
-        let sizeRow = document.getElementById('detailSizeRow');
-        let extraRow = document.getElementById('detailExtraRow');
+        let epRow = document.getElementById('detailEpRow'); let qualRow = document.getElementById('detailQualityRow');
+        let sizeRow = document.getElementById('detailSizeRow'); let extraRow = document.getElementById('detailExtraRow');
         let btnContainer = document.getElementById('detailDownloadBtnContainer');
 
-        epRow.style.display = 'flex';
-        qualRow.style.display = 'flex';
-        sizeRow.style.display = 'flex';
-        extraRow.style.display = 'none';
-        btnContainer.innerHTML = '';
+        epRow.style.display = 'flex'; qualRow.style.display = 'flex'; sizeRow.style.display = 'flex'; extraRow.style.display = 'none'; btnContainer.innerHTML = '';
 
         if (item.category === 'download') {
             document.getElementById('detailEpValue').innerText = formatEpText(item.episodes, item.animeType, item.ovaType);
             document.getElementById('detailQualityValue').innerText = item.quality || 'N/A';
             document.getElementById('detailSizeValue').innerText = item.size || 'N/A';
-
             if (item.filepress) btnContainer.innerHTML += `<a href="${item.filepress}" class="link-btn filepress" target="_blank">FilePress Download</a>`;
             if (item.appdrive) btnContainer.innerHTML += `<a href="${item.appdrive}" class="link-btn appdrive" target="_blank">AppDrive Download</a>`;
             if (item.hubcloud) btnContainer.innerHTML += `<a href="${item.hubcloud}" class="link-btn hubcloud" target="_blank">HubCloud Download</a>`;
+            if (item.gdflix) btnContainer.innerHTML += `<a href="${item.gdflix}" class="link-btn gdflix" target="_blank">GDflix Download</a>`;
             if (item.link) btnContainer.innerHTML += `<a href="${item.link}" class="link-btn customlink" target="_blank">Direct Link</a>`;
         } else if (item.category === 'downloaded') {
             document.getElementById('detailEpValue').innerText = formatEpText(item.episodes, item.animeType, item.ovaType);
             document.getElementById('detailQualityValue').innerText = item.quality || 'N/A';
             document.getElementById('detailSizeValue').innerText = item.size || 'N/A';
-            extraRow.style.display = 'flex';
-            document.getElementById('detailExtraRow').children[0].innerText = 'Storage:';
-            document.getElementById('detailExtraValue').innerText = item.usbDrive || 'USB Storage';
+            extraRow.style.display = 'flex'; document.getElementById('detailExtraRow').children[0].innerText = 'Storage:'; document.getElementById('detailExtraValue').innerText = item.usbDrive || 'USB Storage';
         } else if (item.category === 'ongoing') {
             document.getElementById('detailEpValue').innerText = item.episodes ? formatEpText(item.episodes, item.animeType, item.ovaType) : 'Ongoing';
-            qualRow.style.display = 'none';
-            sizeRow.style.display = 'none';
+            qualRow.style.display = 'none'; sizeRow.style.display = 'none';
             if (item.link) btnContainer.innerHTML += `<a href="${item.link}" class="ongoing-btn" target="_blank">Watch / Download Ongoing</a>`;
         } else if (item.category === 'watching') {
             document.getElementById('detailEpValue').innerText = `Watched ${item.watchedEp || 0} of ${item.totalEp || 0}`;
-            qualRow.style.display = 'none';
-            sizeRow.style.display = 'none';
-            extraRow.style.display = 'flex';
-            document.getElementById('detailExtraRow').children[0].innerText = 'Last Watched:';
-            document.getElementById('detailExtraValue').innerText = item.lastWatched || 'N/A';
+            qualRow.style.display = 'none'; sizeRow.style.display = 'none'; extraRow.style.display = 'flex';
+            document.getElementById('detailExtraRow').children[0].innerText = 'Last Watched:'; document.getElementById('detailExtraValue').innerText = item.lastWatched || 'N/A';
         } else if (item.category === 'completed') {
             document.getElementById('detailEpValue').innerText = `${item.totalEp || 0} (Completed)`;
-            qualRow.style.display = 'none';
-            sizeRow.style.display = 'none';
-            extraRow.style.display = 'flex';
-            document.getElementById('detailExtraRow').children[0].innerText = 'Rating / Year:';
-            document.getElementById('detailExtraValue').innerText = `${item.rating || 'N/A'} ⭐ | ${item.watchYear || 'N/A'}`;
+            qualRow.style.display = 'none'; sizeRow.style.display = 'none'; extraRow.style.display = 'flex';
+            document.getElementById('detailExtraRow').children[0].innerText = 'Rating / Year:'; document.getElementById('detailExtraValue').innerText = `${item.rating || 'N/A'} ⭐ | ${item.watchYear || 'N/A'}`;
         }
-
         document.getElementById('animeDetailModal').style.display = 'flex';
     }
-
-    window.closeAnimeDetailModal = function() {
-        document.getElementById('animeDetailModal').style.display = 'none';
-    }
+    window.closeAnimeDetailModal = function() { document.getElementById('animeDetailModal').style.display = 'none'; }
 
     function parseSizeInMB(sizeStr) {
-        if (!sizeStr) return 0;
-        let str = sizeStr.toString().trim().toUpperCase();
-        let match = str.match(/([\d.]+)\s*(GB|MB|KB)?/);
-        if (!match) return 0;
-        let val = parseFloat(match[1]) || 0;
-        let unit = match[2] || 'MB';
-        if (unit === 'GB') return val * 1024;
-        if (unit === 'KB') return val / 1024;
-        return val;
+        if (!sizeStr) return 0; let str = sizeStr.toString().trim().toUpperCase(); let match = str.match(/([\d.]+)\s*(GB|MB|KB)?/);
+        if (!match) return 0; let val = parseFloat(match[1]) || 0; let unit = match[2] || 'MB';
+        if (unit === 'GB') return val * 1024; if (unit === 'KB') return val / 1024; return val;
     }
 
     window.filterAndSort = function() {
@@ -1736,68 +1127,35 @@
         let sortOption = document.getElementById('sortOption').value;
 
         let filtered = animeData.filter(item => {
-            let matchesSearch = !searchQuery || 
-                (item.title && item.title.toLowerCase().includes(searchQuery)) || 
-                (item.animeCode && item.animeCode.toLowerCase().includes(searchQuery));
-            
+            let matchesSearch = !searchQuery || (item.title && item.title.toLowerCase().includes(searchQuery)) || (item.animeCode && item.animeCode.toLowerCase().includes(searchQuery));
             let matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
             let matchesType = selectedType === 'all' || (item.animeType || 'series') === selectedType;
-
             return matchesSearch && matchesCategory && matchesType;
         });
 
         filtered.sort((a, b) => {
-            if (a.isPinned !== b.isPinned) {
-                return a.isPinned ? -1 : 1;
-            }
-
-            if (sortOption === 'high-low') {
-                let sizeA = parseSizeInMB(a.size);
-                let sizeB = parseSizeInMB(b.size);
-                if (sizeA !== sizeB) return sizeB - sizeA;
-            } else if (sortOption === 'low-high') {
-                let sizeA = parseSizeInMB(a.size);
-                let sizeB = parseSizeInMB(b.size);
-                if (sizeA !== sizeB) return sizeA - sizeB;
-            }
-
-            if (addOrder === 'old-to-new') {
-                return (b.order || 0) - (a.order || 0);
-            } else {
-                return (a.order || 0) - (b.order || 0);
-            }
+            if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+            if (sortOption === 'high-low') { let sizeA = parseSizeInMB(a.size); let sizeB = parseSizeInMB(b.size); if (sizeA !== sizeB) return sizeB - sizeA; } 
+            else if (sortOption === 'low-high') { let sizeA = parseSizeInMB(a.size); let sizeB = parseSizeInMB(b.size); if (sizeA !== sizeB) return sizeA - sizeB; }
+            if (addOrder === 'old-to-new') return (b.order || 0) - (a.order || 0);
+            return (a.order || 0) - (b.order || 0);
         });
 
         renderCards(filtered);
     }
 
     function renderCards(data) {
-        const container = document.getElementById('animeSectionsContainer');
-        container.innerHTML = '';
-
-        if (data.length === 0) {
-            container.innerHTML = '<p style="color: #94a3b8; text-align: center; font-size: 1.1rem;">No anime found.</p>';
-            return;
-        }
-
+        const container = document.getElementById('animeSectionsContainer'); container.innerHTML = '';
+        if (data.length === 0) { container.innerHTML = '<p style="color: #94a3b8; text-align: center; font-size: 1.1rem;">No anime found.</p>'; return; }
+        
         let isAdmin = sessionStorage.getItem("isAdminLoggedIn") === "true";
         let selectedCategory = document.getElementById('filterCategory').value;
-
-        let categoriesToRender = selectedCategory === 'all' 
-            ? ['download', 'downloaded', 'ongoing', 'watching', 'completed'] 
-            : [selectedCategory];
+        let categoriesToRender = selectedCategory === 'all' ? ['download', 'downloaded', 'ongoing', 'watching', 'completed'] : [selectedCategory];
 
         categoriesToRender.forEach(catKey => {
             let catAnimeList = data.filter(item => item.category === catKey);
-
             if (catAnimeList.length > 0) {
-                let rowId = `row-${catKey}`;
-                let sectionHTML = `
-                    <div class="section-title">${categoryTitles[catKey] || catKey}</div>
-                    <div class="anime-row-wrapper">
-                        <div class="anime-row" id="${rowId}">
-                `;
-
+                let sectionHTML = `<div class="section-title">${categoryTitles[catKey] || catKey}</div><div class="anime-row-wrapper"><div class="anime-row" id="row-${catKey}">`;
                 catAnimeList.forEach(item => {
                     let seasonBadgeHTML = `<div class="season-badge">${formatSeasonText(item.season, item.animeType, item.part, item.ovaType)}</div>`;
                     let noteHTML = item.note ? `<div class="anime-card-note">📝 ${item.note}</div>` : '';
@@ -1811,71 +1169,27 @@
                     let codeBadgeHTML = item.animeCode ? `<div class="anime-code-badge">${item.animeCode}</div>` : '';
 
                     let manualLinks = item.manualLinkedIds || [];
-                    let relatedSeasons = animeData.filter(a => 
-                        a.id !== item.id && 
-                        (a.title.trim().toLowerCase() === item.title.trim().toLowerCase() || manualLinks.includes(a.id))
-                    );
-
-                    if (manualLinks.length > 0) {
-                        relatedSeasons.sort((a, b) => {
-                            let idxA = manualLinks.indexOf(a.id);
-                            let idxB = manualLinks.indexOf(b.id);
-                            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-                            return a.order - b.order;
-                        });
-                    }
+                    let relatedSeasons = animeData.filter(a => a.id !== item.id && (a.title.trim().toLowerCase() === item.title.trim().toLowerCase() || manualLinks.includes(a.id)));
+                    if (manualLinks.length > 0) relatedSeasons.sort((a, b) => { let idxA = manualLinks.indexOf(a.id); let idxB = manualLinks.indexOf(b.id); if (idxA !== -1 && idxB !== -1) return idxA - idxB; return a.order - b.order; });
                     
                     let otherSeasonsHTML = '';
                     if (relatedSeasons.length > 0) {
-                        let currentSeasonName = formatSeasonText(item.season, item.animeType, item.part, item.ovaType);
-
-                        let allSeasonEntries = [
-                            { isCurrent: true, text: `Current: ${currentSeasonName}`, id: "" }
-                        ];
-
-                        relatedSeasons.forEach(rel => {
-                            let relName = formatSeasonText(rel.season, rel.animeType, rel.part, rel.ovaType);
-                            allSeasonEntries.push({
-                                isCurrent: false,
-                                text: `${relName} (${categoryTitles[rel.category] || rel.category})`,
-                                id: rel.id
-                            });
-                        });
-
-                        otherSeasonsHTML = `<select class="other-seasons-select" onchange="jumpToSeason(this, this.value)">
-                            <option value="">-- Other Seasons / Movies / OVAs --</option>`;
-                        
-                        allSeasonEntries.forEach(entry => {
-                            if (entry.isCurrent) {
-                                otherSeasonsHTML += `<option value="" disabled style="color: #f97316; font-weight: bold;">${entry.text}</option>`;
-                            } else {
-                                otherSeasonsHTML += `<option value="${entry.id}">${entry.text}</option>`;
-                            }
-                        });
-                        
+                        otherSeasonsHTML = `<select class="other-seasons-select" onchange="jumpToSeason(this, this.value)"><option value="">-- Other Seasons / Movies / OVAs --</option><option value="" disabled style="color: #f97316; font-weight: bold;">Current: ${formatSeasonText(item.season, item.animeType, item.part, item.ovaType)}</option>`;
+                        relatedSeasons.forEach(rel => { otherSeasonsHTML += `<option value="${rel.id}">${formatSeasonText(rel.season, rel.animeType, rel.part, rel.ovaType)} (${categoryTitles[rel.category] || rel.category})</option>`; });
                         otherSeasonsHTML += `</select>`;
                     }
 
                     let dragProps = isAdmin ? `draggable="true" ondragstart="handleDragStart(event, '${item.id}')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, '${item.id}')" ondragend="handleDragEnd(event)"` : '';
-
                     let cardHTML = `<div class="anime-card ${orientationClass} ${pinnedClass}" id="card-${item.id}" ${dragProps} onclick="openAnimeDetailModal('${item.id}', event)">
-                        <div class="badges-container">
-                            ${typeBadgeHTML}
-                            ${pinBadgeHTML}
-                            ${newBadgeHTML}
-                            ${codeBadgeHTML}
-                        </div>`;
+                        <div class="badges-container">${typeBadgeHTML}${pinBadgeHTML}${newBadgeHTML}${codeBadgeHTML}</div>`;
 
                     if (isAdmin) {
-                        let pinBtnText = item.isPinned ? '📍 Unpin' : '📌 Pin to Top';
-                        let newBtnText = item.isNew ? '⚪ Turn NEW Off' : '🟢 Turn NEW On';
-                        
                         cardHTML += `
                             <div class="card-menu-container" style="display: block;">
                                 <button class="dots-btn" onclick="toggleCardMenu('${item.id}', event)">⋮</button>
                                 <div id="menu-${item.id}" class="dropdown-menu">
-                                    <button onclick="togglePinCard('${item.id}')" style="color: #f59e0b; font-weight: bold;">${pinBtnText}</button>
-                                    <button onclick="toggleNewCard('${item.id}')" style="color: #22c55e; font-weight: bold;">${newBtnText}</button>
+                                    <button onclick="togglePinCard('${item.id}')" style="color: #f59e0b; font-weight: bold;">${item.isPinned ? '📍 Unpin' : '📌 Pin to Top'}</button>
+                                    <button onclick="toggleNewCard('${item.id}')" style="color: #22c55e; font-weight: bold;">${item.isNew ? '⚪ Turn NEW Off' : '🟢 Turn NEW On'}</button>
                                     <button onclick="moveOrderById('${item.id}', -1)">⬅️ Move Left</button>
                                     <button onclick="moveOrderById('${item.id}', 1)">➡️ Move Right</button>
                                     <button onclick="openMoveModal('${item.id}')" style="color: #38bdf8; font-weight: bold;">🔁 Move Section</button>
@@ -1888,69 +1202,32 @@
                             </div>`;
                     }
 
-                    cardHTML += `
-                        <img src="${item.poster}" class="anime-poster" alt="Poster">
-                        <div class="anime-info">
-                            <h3 class="anime-title" title="${item.title}">${item.title}</h3>
-                            ${seasonBadgeHTML}
-                            ${noteHTML}
-                            ${otherSeasonsHTML}
-                    `;
-
+                    cardHTML += `<img src="${item.poster}" class="anime-poster" alt="Poster"><div class="anime-info"><h3 class="anime-title" title="${item.title}">${item.title}</h3>${seasonBadgeHTML}${noteHTML}${otherSeasonsHTML}`;
                     let epOrDurLabel = (item.animeType === 'movie' || (item.animeType === 'ova' && item.ovaType === 'duration')) ? 'Duration' : 'Ep';
 
                     if (item.category === 'download') {
-                        cardHTML += `<div class="anime-meta">${epOrDurLabel}: ${epStr}<br>Qual: ${item.quality || 'N/A'}<br>Size: ${item.size || 'N/A'}</div>`;
-                        cardHTML += `<div class="btn-container">`;
+                        cardHTML += `<div class="anime-meta">${epOrDurLabel}: ${epStr}<br>Qual: ${item.quality || 'N/A'}<br>Size: ${item.size || 'N/A'}</div><div class="btn-container">`;
                         if (item.filepress) cardHTML += `<a href="${item.filepress}" class="link-btn filepress" target="_blank">FilePress</a>`;
                         if (item.appdrive) cardHTML += `<a href="${item.appdrive}" class="link-btn appdrive" target="_blank">AppDrive</a>`;
                         if (item.hubcloud) cardHTML += `<a href="${item.hubcloud}" class="link-btn hubcloud" target="_blank">HubCloud</a>`;
+                        if (item.gdflix) cardHTML += `<a href="${item.gdflix}" class="link-btn gdflix" target="_blank">GDflix</a>`;
                         if (item.link) cardHTML += `<a href="${item.link}" class="link-btn customlink" target="_blank">Link</a>`;
                         cardHTML += `</div>`;
                     } else if (item.category === 'downloaded') {
-                        cardHTML += `
-                            <div class="anime-meta" style="color: #22c55e; font-weight: bold;">💾 ${item.usbDrive}</div>
-                            <div class="anime-meta">${epOrDurLabel}: ${epStr}<br>Qual: ${item.quality || 'N/A'}</div>
-                        `;
+                        cardHTML += `<div class="anime-meta" style="color: #22c55e; font-weight: bold;">💾 ${item.usbDrive}</div><div class="anime-meta">${epOrDurLabel}: ${epStr}<br>Qual: ${item.quality || 'N/A'}</div>`;
                     } else if (item.category === 'ongoing') {
-                        cardHTML += `
-                            <div class="anime-meta">Status: ${item.episodes ? epStr : 'Ongoing'}</div>
-                            <a href="${item.link || '#'}" class="ongoing-btn" target="_blank">Ongoing Link</a>
-                        `;
+                        cardHTML += `<div class="anime-meta">Status: ${item.episodes ? epStr : 'Ongoing'}</div><a href="${item.link || '#'}" class="ongoing-btn" target="_blank">Ongoing Link</a>`;
                     } else if (item.category === 'watching') {
-                        let totalNum = parseInt(item.totalEp) || 0;
-                        let watchedNum = parseInt(item.watchedEp) || 0;
-                        let leftEp = Math.max(0, totalNum - watchedNum);
-                        cardHTML += `
-                            <div class="anime-meta">
-                                Total: ${totalNum} Ep | Watched: ${watchedNum}<br>
-                                Remaining: <span style="color: #f97316; font-weight: bold;">${leftEp} Ep Left</span><br>
-                                Last Watched: ${item.lastWatched || 'N/A'}
-                            </div>
-                        `;
+                        let totalNum = parseInt(item.totalEp) || 0; let watchedNum = parseInt(item.watchedEp) || 0; let leftEp = Math.max(0, totalNum - watchedNum);
+                        cardHTML += `<div class="anime-meta">Total: ${totalNum} Ep | Watched: ${watchedNum}<br>Remaining: <span style="color: #f97316; font-weight: bold;">${leftEp} Ep Left</span><br>Last Watched: ${item.lastWatched || 'N/A'}</div>`;
                     } else if (item.category === 'completed') {
-                        cardHTML += `
-                            <div class="anime-meta">
-                                Total Ep: ${item.totalEp || 'N/A'}<br>
-                                Rating: ${item.rating || 'N/A'} ⭐<br>
-                                Watched Year: ${item.watchYear || 'N/A'}
-                            </div>
-                        `;
+                        cardHTML += `<div class="anime-meta">Total Ep: ${item.totalEp || 'N/A'}<br>Rating: ${item.rating || 'N/A'} ⭐<br>Watched Year: ${item.watchYear || 'N/A'}</div>`;
                     }
 
-                    cardHTML += `
-                            </div>
-                        </div>
-                    `;
-
+                    cardHTML += `</div></div>`;
                     sectionHTML += cardHTML;
                 });
-
-                sectionHTML += `
-                        </div>
-                    </div>
-                `;
-
+                sectionHTML += `</div></div>`;
                 container.innerHTML += sectionHTML;
             }
         });
