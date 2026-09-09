@@ -721,6 +721,7 @@
 
         if (cat === 'download') {
             return `
+                <input type="text" id="${prefix}TotalEp" placeholder="Total Episodes (e.g. 24 Ep)" style="margin-bottom: 10px;">
                 <input type="text" id="${prefix}Quality" placeholder="Quality (e.g. 720p)">
                 <input type="text" id="${prefix}Size" placeholder="File Size (e.g. 1.04GB)">
                 <div style="margin-bottom: 10px;">
@@ -827,6 +828,7 @@
 
     function fillCardDataFromForm(cardObj, category, prefix) {
         if (category === 'download') {
+            cardObj.totalEp = document.getElementById(prefix + 'TotalEp') ? document.getElementById(prefix + 'TotalEp').value : '';
             cardObj.quality = document.getElementById(prefix + 'Quality').value;
             cardObj.size = document.getElementById(prefix + 'Size').value;
             let partCountSel = document.getElementById(prefix + 'PartCount');
@@ -841,7 +843,6 @@
                 cardObj.hubcloud = document.getElementById(prefix + 'SingleHubcloud') ? document.getElementById(prefix + 'SingleHubcloud').value : '';
                 cardObj.gdflix = document.getElementById(prefix + 'SingleGDflix') ? document.getElementById(prefix + 'SingleGDflix').value : '';
                 cardObj.link = document.getElementById(prefix + 'SingleLink') ? document.getElementById(prefix + 'SingleLink').value : '';
-                cardObj.episodes = 'Single File';
             } else {
                 let partsArr = [];
                 for (let i = 1; i <= partCount; i++) {
@@ -867,7 +868,6 @@
                     cardObj.hubcloud = partsArr[0].hubcloud;
                     cardObj.gdflix = partsArr[0].gdflix;
                     cardObj.link = partsArr[0].link;
-                    cardObj.episodes = partsArr[0].partTitle;
                 }
             }
         } else if (category === 'downloaded') {
@@ -981,6 +981,7 @@
             let item = animeData.find(a => a.id === movingId); if (!item) return;
             setTimeout(() => {
                 if (targetCat === 'download') {
+                    if (document.getElementById('moveInputTotalEp')) document.getElementById('moveInputTotalEp').value = item.totalEp || '';
                     if (document.getElementById('moveInputQuality')) document.getElementById('moveInputQuality').value = item.quality || '';
                     if (document.getElementById('moveInputSize')) document.getElementById('moveInputSize').value = item.size || '';
                 } else {
@@ -1020,6 +1021,7 @@
             if (item && item.category === cat) {
                 setTimeout(() => {
                     if (cat === 'download') {
+                        if (document.getElementById('modalEditInputTotalEp')) document.getElementById('modalEditInputTotalEp').value = item.totalEp || '';
                         if (document.getElementById('modalEditInputQuality')) document.getElementById('modalEditInputQuality').value = item.quality || '';
                         if (document.getElementById('modalEditInputSize')) document.getElementById('modalEditInputSize').value = item.size || '';
                         let pCount = item.downloadParts && item.downloadParts.length > 0 ? item.downloadParts.length : (item.downloadPartCount !== undefined ? item.downloadPartCount : 0);
@@ -1044,12 +1046,6 @@
                                 if (document.getElementById('modalEditInputPartGDflix_' + i)) document.getElementById('modalEditInputPartGDflix_' + i).value = p.gdflix || '';
                                 if (document.getElementById('modalEditInputPartLink_' + i)) document.getElementById('modalEditInputPartLink_' + i).value = p.link || '';
                             });
-                        } else {
-                            if (document.getElementById('modalEditInputPartFilepress_1')) document.getElementById('modalEditInputPartFilepress_1').value = item.filepress || '';
-                            if (document.getElementById('modalEditInputPartAppdrive_1')) document.getElementById('modalEditInputPartAppdrive_1').value = item.appdrive || '';
-                            if (document.getElementById('modalEditInputPartHubcloud_1')) document.getElementById('modalEditInputPartHubcloud_1').value = item.hubcloud || '';
-                            if (document.getElementById('modalEditInputPartGDflix_1')) document.getElementById('modalEditInputPartGDflix_1').value = item.gdflix || '';
-                            if (document.getElementById('modalEditInputPartLink_1')) document.getElementById('modalEditInputPartLink_1').value = item.link || '';
                         }
                     } else if (cat === 'downloaded') {
                         if (document.getElementById('modalEditInputUsbDrive')) document.getElementById('modalEditInputUsbDrive').value = item.usbDrive || 'Flash 32GB USB';
@@ -1241,7 +1237,7 @@
 
         if (item.category === 'download') {
             let pCount = item.downloadParts && item.downloadParts.length > 0 ? item.downloadParts.length : (item.downloadPartCount !== undefined ? item.downloadPartCount : 0);
-            document.getElementById('detailEpValue').innerText = pCount === 0 ? 'Single File / Link' : `${pCount} Parts Available`;
+            document.getElementById('detailEpValue').innerText = item.totalEp ? formatEpText(item.totalEp, item.animeType, item.ovaType) : (pCount === 0 ? 'Single File / Link' : `${pCount} Parts Available`);
             document.getElementById('detailQualityValue').innerText = item.quality || 'N/A';
             document.getElementById('detailSizeValue').innerText = item.size || 'N/A';
             
@@ -1390,7 +1386,6 @@
                 catAnimeList.forEach(item => {
                     let seasonBadgeHTML = `<div class="season-badge">${formatSeasonText(item.season, item.animeType, item.part, item.ovaType)}</div>`;
                     let noteHTML = item.note ? `<div class="anime-card-note">📝 ${item.note}</div>` : '';
-                    let epStr = formatEpText(item.episodes || item.totalEp, item.animeType, item.ovaType);
                     let orientationClass = item.orientation === 'landscape' ? 'card-landscape' : 'card-portrait';
                     let pinnedClass = item.isPinned ? 'pinned-card' : '';
                     
@@ -1434,11 +1429,12 @@
                     }
 
                     cardHTML += `<img src="${item.poster}" class="anime-poster" alt="Poster"><div class="anime-info"><h3 class="anime-title" title="${item.title}">${item.title}</h3>${seasonBadgeHTML}${noteHTML}${otherSeasonsHTML}`;
-                    let epOrDurLabel = (item.animeType === 'movie' || (item.animeType === 'ova' && item.ovaType === 'duration')) ? 'Duration' : 'Parts';
+                    let epOrDurLabel = (item.animeType === 'movie' || (item.animeType === 'ova' && item.ovaType === 'duration')) ? 'Duration' : 'Episodes';
 
                     if (item.category === 'download') {
                         let pCount = item.downloadParts && item.downloadParts.length > 0 ? item.downloadParts.length : (item.downloadPartCount !== undefined ? item.downloadPartCount : 0);
-                        cardHTML += `<div class="anime-meta">Parts: ${pCount === 0 ? 'Single File' : pCount + ' Available'}<br>Qual: ${item.quality || 'N/A'}<br>Size: ${item.size || 'N/A'}</div><div class="btn-container">`;
+                        let epDisplay = item.totalEp ? formatEpText(item.totalEp, item.animeType, item.ovaType) : (pCount === 0 ? 'Single File' : pCount + ' Parts Available');
+                        cardHTML += `<div class="anime-meta">${epOrDurLabel}: ${epDisplay}<br>Qual: ${item.quality || 'N/A'}<br>Size: ${item.size || 'N/A'}</div><div class="btn-container">`;
                         
                         if (pCount === 0) {
                             if (item.filepress) cardHTML += `<a href="${item.filepress}" class="link-btn filepress" target="_blank">FilePress</a>`;
@@ -1459,9 +1455,9 @@
                         }
                         cardHTML += `</div>`;
                     } else if (item.category === 'downloaded') {
-                        cardHTML += `<div class="anime-meta" style="color: #22c55e; font-weight: bold;">💾 ${item.usbDrive}</div><div class="anime-meta">${epOrDurLabel}: ${epStr}<br>Qual: ${item.quality || 'N/A'}</div>`;
+                        cardHTML += `<div class="anime-meta" style="color: #22c55e; font-weight: bold;">💾 ${item.usbDrive}</div><div class="anime-meta">${epOrDurLabel}: ${formatEpText(item.episodes, item.animeType, item.ovaType)}<br>Qual: ${item.quality || 'N/A'}</div>`;
                     } else if (item.category === 'ongoing') {
-                        cardHTML += `<div class="anime-meta">Status: ${item.episodes ? epStr : 'Ongoing'}</div><a href="${item.link || '#'}" class="ongoing-btn" target="_blank">Ongoing Link</a>`;
+                        cardHTML += `<div class="anime-meta">Status: ${item.episodes ? formatEpText(item.episodes, item.animeType, item.ovaType) : 'Ongoing'}</div><a href="${item.link || '#'}" class="ongoing-btn" target="_blank">Ongoing Link</a>`;
                     } else if (item.category === 'watching') {
                         let totalNum = parseInt(item.totalEp) || 0; let watchedNum = parseInt(item.watchedEp) || 0; let leftEp = Math.max(0, totalNum - watchedNum);
                         cardHTML += `<div class="anime-meta">Total: ${totalNum} Ep | Watched: ${watchedNum}<br>Remaining: <span style="color: #f97316; font-weight: bold;">${leftEp} Ep Left</span><br>Last Watched: ${item.lastWatched || 'N/A'}</div>`;
