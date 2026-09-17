@@ -62,8 +62,13 @@
 
         .section-title { font-size: 1.6rem; color: #fff; font-weight: 800; margin: 35px 0 20px 0; display: flex; align-items: center; gap: 10px; border-left: 5px solid var(--accent-orange); padding-left: 14px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
         
-        .anime-row-wrapper { width: 100%; }
-        .anime-row { display: flex; flex-wrap: wrap; gap: 24px; width: 100%; box-sizing: border-box; align-items: stretch; }
+        .anime-row-wrapper { width: 100%; margin-bottom: 15px; }
+        /* Horizontal Scrolling Section Implementation */
+        .anime-row { display: flex; gap: 24px; width: 100%; overflow-x: auto; padding-bottom: 15px; box-sizing: border-box; scroll-behavior: smooth; }
+        .anime-row::-webkit-scrollbar { height: 8px; }
+        .anime-row::-webkit-scrollbar-track { background: #0b0f19; border-radius: 4px; }
+        .anime-row::-webkit-scrollbar-thumb { background: var(--border-glass); border-radius: 4px; }
+        .anime-row::-webkit-scrollbar-thumb:hover { background: var(--accent-neon); }
 
         .anime-card { background: #0f172a; border-radius: 12px; overflow: visible; border: 1px solid #1e293b; position: relative; transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; cursor: pointer; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5); }
         .anime-card:hover { transform: translateY(-6px); border-color: var(--accent-orange); box-shadow: 0 20px 35px -10px rgba(249,115,22,0.25); }
@@ -115,12 +120,6 @@
         .gdflix { background: #eab308; color: #000; }
         .customlink { background: #f97316; color: #fff; }
         .ongoing-btn { background: #f59e0b; display: block; padding: 10px; text-align: center; color: #000; text-decoration: none; border-radius: 6px; font-weight: 800; font-size: 0.9rem; }
-
-        /* Pagination Toolbar */
-        .pagination-bar { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 40px 0 20px 0; }
-        .page-btn { background: var(--bg-panel); color: var(--accent-neon); border: 1px solid var(--border-glass); padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
-        .page-btn:hover { background: var(--accent-neon); color: #0f172a; border-color: var(--accent-neon); }
-        .page-btn.active { background: var(--accent-orange); color: #fff; border-color: var(--accent-orange); }
 
         .part-box { background: #0b0f19; border: 1px solid #1e293b; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
         .part-box-title { font-size: 0.85rem; color: var(--accent-neon); font-weight: 800; margin-bottom: 8px; display: block; border-bottom: 1px solid #1e293b; padding-bottom: 6px; }
@@ -314,7 +313,6 @@
     </div>
 
     <div id="animeSectionsContainer"></div>
-    <div id="paginationContainer"></div>
 </div>
 
 <div id="cropModal" class="modal-overlay">
@@ -511,8 +509,6 @@
     let movingId = null;
     let activeSeasonAnimeId = null;
     let draggedItemId = null;
-    let currentPage = 1;
-    const itemsPerPage = 12;
 
     let cropperInstance = null;
     let croppedBase64Data = null;
@@ -525,6 +521,12 @@
         'ongoing': 'Ongoing Releases',
         'watching': 'Currently Watching',
         'completed': 'Completed Anime'
+    };
+
+    const monthOrder = {
+        "January": 1, "February": 2, "March": 3, "April": 4, 
+        "May": 5, "June": 6, "July": 7, "August": 8, 
+        "September": 9, "October": 10, "November": 11, "December": 12
     };
 
     window.onload = async function() {
@@ -1353,7 +1355,6 @@
     }
 
     window.filterAndSort = function() {
-        currentPage = 1;
         executeFilterAndRender();
     }
 
@@ -1374,7 +1375,13 @@
             let yearSelect = document.getElementById('filterWatchYear');
             let currentSelectedYear = yearSelect.value;
             let uniqueYears = [...new Set(animeData.filter(a => a.category === 'completed' && a.watchYear).map(a => a.watchYear.trim()))];
-            uniqueYears.sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
+            
+            // Numerical/Chronological Year Sorting
+            uniqueYears.sort((a, b) => {
+                let numA = parseInt(a.replace(/\D/g, '')) || 0;
+                let numB = parseInt(b.replace(/\D/g, '')) || 0;
+                return numA - numB;
+            });
 
             let yearOptionsHTML = `<option value="all">All Years</option>`;
             uniqueYears.forEach(y => {
@@ -1412,8 +1419,30 @@
             return matchesSearch && matchesCategory && matchesType && matchesYear && matchesMonth;
         });
 
+        // Smart Chronological Sorting for Completed Section (Year -> Month)
         filtered.sort((a, b) => {
             if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+
+            if (selectedCategory === 'completed') {
+                let yearA = parseInt((a.watchYear || '0').replace(/\D/g, '')) || 0;
+                let yearB = parseInt((b.watchYear || '0').replace(/\D/g, '')) || 0;
+                if (yearA !== yearB) return yearA - yearB; // Older years first (2024 -> 2025 -> 2026)
+
+                let monthAVal = 99;
+                let monthBVal = 99;
+                if (a.watchMonth) {
+                    for (let m in monthOrder) {
+                        if (a.watchMonth.toUpperCase().includes(m.toUpperCase())) { monthAVal = monthOrder[m]; break; }
+                    }
+                }
+                if (b.watchMonth) {
+                    for (let m in monthOrder) {
+                        if (b.watchMonth.toUpperCase().includes(m.toUpperCase())) { monthBVal = monthOrder[m]; break; }
+                    }
+                }
+                if (monthAVal !== monthBVal) return monthAVal - monthBVal; // Jan -> Feb -> March...
+            }
+
             if (sortOption === 'high-low') { let sizeA = parseSizeInMB(a.size); let sizeB = parseSizeInMB(b.size); if (sizeA !== sizeB) return sizeB - sizeA; } 
             else if (sortOption === 'low-high') { let sizeA = parseSizeInMB(a.size); let sizeB = parseSizeInMB(b.size); if (sizeA !== sizeB) return sizeA - sizeB; }
             if (addOrder === 'old-to-new') return (b.order || 0) - (a.order || 0);
@@ -1423,133 +1452,122 @@
         renderCards(filtered);
     }
 
-    window.changePage = function(pageNumber) {
-        currentPage = pageNumber;
-        executeFilterAndRender();
-        window.scrollTo({ top: 400, behavior: 'smooth' });
-    }
-
     function renderCards(data) {
         const container = document.getElementById('animeSectionsContainer');
-        const paginationContainer = document.getElementById('paginationContainer');
         container.innerHTML = '';
-        paginationContainer.innerHTML = '';
 
         if (data.length === 0) { container.innerHTML = '<p style="color: var(--text-muted); text-align: center; font-size: 1.1rem; padding: 40px;">No anime found matching your filter criteria.</p>'; return; }
         
-        let totalPages = Math.ceil(data.length / itemsPerPage);
-        if (currentPage > totalPages) currentPage = totalPages;
-        
-        let startIndex = (currentPage - 1) * itemsPerPage;
-        let paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
-
         let isAdmin = sessionStorage.getItem("isAdminLoggedIn") === "true";
         let selectedCategory = document.getElementById('filterCategory').value;
         let categoriesToRender = selectedCategory === 'all' ? ['download', 'downloaded', 'ongoing', 'watching', 'completed'] : [selectedCategory];
 
         categoriesToRender.forEach(catKey => {
-            let catAnimeList = paginatedData.filter(item => item.category === catKey);
+            let catAnimeList = data.filter(item => item.category === catKey);
             if (catAnimeList.length > 0) {
-                let sectionHTML = `<div class="section-title">${categoryTitles[catKey] || catKey}</div><div class="anime-row-wrapper"><div class="anime-row" id="row-${catKey}">`;
-                catAnimeList.forEach(item => {
-                    let seasonBadgeHTML = `<div class="season-badge">${formatSeasonText(item.season, item.animeType, item.part, item.ovaType)}</div>`;
-                    let noteHTML = item.note ? `<div class="anime-card-note">📝 ${item.note}</div>` : '';
-                    let orientationClass = item.orientation === 'landscape' ? 'card-landscape' : 'card-portrait';
-                    let pinnedClass = item.isPinned ? 'pinned-card' : '';
-                    
-                    let typeBadgeHTML = renderTypeBadge(item.animeType);
-                    let pinBadgeHTML = item.isPinned ? `<div class="pin-badge">📌 PINNED</div>` : '';
-                    let newBadgeHTML = item.isNew ? `<div class="new-badge">NEW</div>` : '';
-                    let codeBadgeHTML = item.animeCode ? `<div class="anime-code-badge">${item.animeCode}</div>` : '';
+                let chunkedList = [];
+                for (let i = 0; i < catAnimeList.length; i += 10) {
+                    chunkedList.push(catAnimeList.slice(i, i + 10));
+                }
 
-                    let manualLinks = item.manualLinkedIds || [];
-                    let relatedSeasons = animeData.filter(a => a.id !== item.id && (a.title.trim().toLowerCase() === item.title.trim().toLowerCase() || manualLinks.includes(a.id)));
-                    if (manualLinks.length > 0) relatedSeasons.sort((a, b) => { let idxA = manualLinks.indexOf(a.id); let idxB = manualLinks.indexOf(b.id); if (idxA !== -1 && idxB !== -1) return idxA - idxB; return a.order - b.order; });
-                    
-                    let otherSeasonsHTML = '';
-                    if (relatedSeasons.length > 0) {
-                        otherSeasonsHTML = `<select class="other-seasons-select" onchange="jumpToSeason(this, this.value)"><option value="">-- Other Seasons / OVAs --</option><option value="" disabled style="color: var(--accent-orange); font-weight: bold;">Current: ${formatSeasonText(item.season, item.animeType, item.part, item.ovaType)}</option>`;
-                        relatedSeasons.forEach(rel => { otherSeasonsHTML += `<option value="${rel.id}">${formatSeasonText(rel.season, rel.animeType, rel.part, rel.ovaType)} (${categoryTitles[rel.category] || rel.category})</option>`; });
-                        otherSeasonsHTML += `</select>`;
+                chunkedList.forEach((chunk, chunkIndex) => {
+                    let rowTitle = categoryTitles[catKey] || catKey;
+                    if (chunkedList.length > 1) {
+                        rowTitle += ` (Part ${chunkIndex + 1})`;
                     }
 
-                    let dragProps = isAdmin ? `draggable="true" ondragstart="handleDragStart(event, '${item.id}')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, '${item.id}')" ondragend="handleDragEnd(event)"` : '';
-                    let cardHTML = `<div class="anime-card ${orientationClass} ${pinnedClass}" id="card-${item.id}" ${dragProps} onclick="openAnimeDetailModal('${item.id}', event)">
-                        <div class="badges-container">${typeBadgeHTML}${pinBadgeHTML}${newBadgeHTML}${codeBadgeHTML}</div>`;
-
-                    if (isAdmin) {
-                        cardHTML += `
-                            <div class="card-menu-container" style="display: block;">
-                                <button class="dots-btn" onclick="toggleCardMenu('${item.id}', event)">⋮</button>
-                                <div id="menu-${item.id}" class="dropdown-menu">
-                                    <button onclick="togglePinCard('${item.id}')" style="color: #f59e0b; font-weight: bold;">${item.isPinned ? '📍 Unpin' : '📌 Pin to Top'}</button>
-                                    <button onclick="toggleNewCard('${item.id}')" style="color: var(--accent-green); font-weight: bold;">${item.isNew ? '⚪ Turn NEW Off' : '🟢 Turn NEW On'}</button>
-                                    <button onclick="moveOrderById('${item.id}', -1)">⬅️ Move Left</button>
-                                    <button onclick="moveOrderById('${item.id}', 1)">➡️ Move Right</button>
-                                    <button onclick="openMoveModal('${item.id}')" style="color: var(--accent-neon); font-weight: bold;">🔁 Move Section</button>
-                                    <button onclick="openSeasonsModal('${item.id}')" style="color: var(--accent-orange); font-weight: bold;">🔗 Manage Seasons</button>
-                                    <button onclick="editCard('${item.id}')">✏️ Edit Info</button>
-                                    <button onclick="deleteCard('${item.id}')">🗑️ Delete</button>
-                                    <button onclick="cloneCard('${item.id}')">📑 Clone</button>
-                                    <button onclick="shareCard('${item.id}')">🔗 Share</button>
-                                </div>
-                            </div>`;
-                    }
-
-                    cardHTML += `<img src="${item.poster}" class="anime-poster" alt="Poster"><div class="anime-info"><h3 class="anime-title" title="${item.title}">${item.title}</h3>${seasonBadgeHTML}${noteHTML}${otherSeasonsHTML}`;
-                    let epOrDurLabel = (item.animeType === 'movie' || (item.animeType === 'ova' && item.ovaType === 'duration')) ? 'Duration' : 'Episodes';
-
-                    if (item.category === 'download') {
-                        let pCount = item.downloadParts && item.downloadParts.length > 0 ? item.downloadParts.length : (item.downloadPartCount !== undefined ? item.downloadPartCount : 0);
-                        let epDisplay = item.totalEp ? formatEpText(item.totalEp, item.animeType, item.ovaType) : (pCount === 0 ? 'Single File' : pCount + ' Parts');
-                        cardHTML += `<div class="anime-meta">${epOrDurLabel}: ${epDisplay}<br>Qual: ${item.quality || 'N/A'}<br>Size: ${item.size || 'N/A'}</div><div class="btn-container">`;
+                    let sectionHTML = `<div class="section-title">${rowTitle}</div><div class="anime-row-wrapper"><div class="anime-row" id="row-${catKey}-${chunkIndex}">`;
+                    
+                    chunk.forEach(item => {
+                        let seasonBadgeHTML = `<div class="season-badge">${formatSeasonText(item.season, item.animeType, item.part, item.ovaType)}</div>`;
+                        let noteHTML = item.note ? `<div class="anime-card-note">📝 ${item.note}</div>` : '';
+                        let orientationClass = item.orientation === 'landscape' ? 'card-landscape' : 'card-portrait';
+                        let pinnedClass = item.isPinned ? 'pinned-card' : '';
                         
-                        if (pCount === 0) {
-                            if (item.filepress) cardHTML += `<a href="${item.filepress}" class="link-btn filepress" target="_blank">FilePress</a>`;
-                            if (item.appdrive) cardHTML += `<a href="${item.appdrive}" class="link-btn appdrive" target="_blank">AppDrive</a>`;
-                            if (item.hubcloud) cardHTML += `<a href="${item.hubcloud}" class="link-btn hubcloud" target="_blank">HubCloud</a>`;
-                            if (item.gdflix) cardHTML += `<a href="${item.gdflix}" class="link-btn gdflix" target="_blank">GDflix</a>`;
-                            if (item.link) cardHTML += `<a href="${item.link}" class="link-btn customlink" target="_blank">Direct Link</a>`;
-                        } else {
-                            let parts = item.downloadParts && item.downloadParts.length > 0 ? item.downloadParts : [{ partTitle: 'Part 1', filepress: item.filepress, appdrive: item.appdrive, hubcloud: item.hubcloud, gdflix: item.gdflix, link: item.link }];
-                            parts.forEach((p, idx) => {
-                                let pName = p.partTitle || `Part ${idx + 1}`;
-                                if (p.filepress) cardHTML += `<a href="${p.filepress}" class="link-btn filepress" target="_blank">Filepress ${pName}</a>`;
-                                if (p.appdrive) cardHTML += `<a href="${p.appdrive}" class="link-btn appdrive" target="_blank">Appdrive ${pName}</a>`;
-                                if (p.hubcloud) cardHTML += `<a href="${p.hubcloud}" class="link-btn hubcloud" target="_blank">Hubcloud ${pName}</a>`;
-                                if (p.gdflix) cardHTML += `<a href="${p.gdflix}" class="link-btn gdflix" target="_blank">Gdflix ${pName}</a>`;
-                                if (p.link) cardHTML += `<a href="${p.link}" class="link-btn customlink" target="_blank">Link ${pName}</a>`;
-                            });
-                        }
-                        cardHTML += `</div>`;
-                    } else if (item.category === 'downloaded') {
-                        cardHTML += `<div class="anime-meta" style="color: var(--accent-green); font-weight: bold;">💾 ${item.usbDrive}</div><div class="anime-meta">${epOrDurLabel}: ${formatEpText(item.episodes, item.animeType, item.ovaType)}<br>Qual: ${item.quality || 'N/A'}</div>`;
-                    } else if (item.category === 'ongoing') {
-                        cardHTML += `<div class="anime-meta">Status: ${item.episodes ? formatEpText(item.episodes, item.animeType, item.ovaType) : 'Ongoing'}</div><a href="${item.link || '#'}" class="ongoing-btn" target="_blank">Ongoing Link</a>`;
-                    } else if (item.category === 'watching') {
-                        let totalNum = parseInt(item.totalEp) || 0; let watchedNum = parseInt(item.watchedEp) || 0; let leftEp = Math.max(0, totalNum - watchedNum);
-                        cardHTML += `<div class="anime-meta">Total: ${totalNum} Ep | Watched: ${watchedNum}<br>Remaining: <span style="color: var(--accent-orange); font-weight: bold;">${leftEp} Left</span><br>Last Watched: ${item.lastWatched || 'N/A'}</div>`;
-                    } else if (item.category === 'completed') {
-                        cardHTML += `<div class="anime-meta">Total Ep: ${item.totalEp || 'N/A'}<br>Rating: ${item.rating || 'N/A'} ⭐<br>Year: ${item.watchYear || 'N/A'}<br>Month: ${item.watchMonth || 'N/A'}</div>`;
-                    }
+                        let typeBadgeHTML = renderTypeBadge(item.animeType);
+                        let pinBadgeHTML = item.isPinned ? `<div class="pin-badge">📌 PINNED</div>` : '';
+                        let newBadgeHTML = item.isNew ? `<div class="new-badge">NEW</div>` : '';
+                        let codeBadgeHTML = item.animeCode ? `<div class="anime-code-badge">${item.animeCode}</div>` : '';
 
-                    cardHTML += `</div></div>`;
-                    sectionHTML += cardHTML;
+                        let manualLinks = item.manualLinkedIds || [];
+                        let relatedSeasons = animeData.filter(a => a.id !== item.id && (a.title.trim().toLowerCase() === item.title.trim().toLowerCase() || manualLinks.includes(a.id)));
+                        if (manualLinks.length > 0) relatedSeasons.sort((a, b) => { let idxA = manualLinks.indexOf(a.id); let idxB = manualLinks.indexOf(b.id); if (idxA !== -1 && idxB !== -1) return idxA - idxB; return a.order - b.order; });
+                        
+                        let otherSeasonsHTML = '';
+                        if (relatedSeasons.length > 0) {
+                            otherSeasonsHTML = `<select class="other-seasons-select" onchange="jumpToSeason(this, this.value)"><option value="">-- Other Seasons / OVAs --</option><option value="" disabled style="color: var(--accent-orange); font-weight: bold;">Current: ${formatSeasonText(item.season, item.animeType, item.part, item.ovaType)}</option>`;
+                            relatedSeasons.forEach(rel => { otherSeasonsHTML += `<option value="${rel.id}">${formatSeasonText(rel.season, rel.animeType, rel.part, rel.ovaType)} (${categoryTitles[rel.category] || rel.category})</option>`; });
+                            otherSeasonsHTML += `</select>`;
+                        }
+
+                        let dragProps = isAdmin ? `draggable="true" ondragstart="handleDragStart(event, '${item.id}')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, '${item.id}')" ondragend="handleDragEnd(event)"` : '';
+                        let cardHTML = `<div class="anime-card ${orientationClass} ${pinnedClass}" id="card-${item.id}" ${dragProps} onclick="openAnimeDetailModal('${item.id}', event)">
+                            <div class="badges-container">${typeBadgeHTML}${pinBadgeHTML}${newBadgeHTML}${codeBadgeHTML}</div>`;
+
+                        if (isAdmin) {
+                            cardHTML += `
+                                <div class="card-menu-container" style="display: block;">
+                                    <button class="dots-btn" onclick="toggleCardMenu('${item.id}', event)">⋮</button>
+                                    <div id="menu-${item.id}" class="dropdown-menu">
+                                        <button onclick="togglePinCard('${item.id}')" style="color: #f59e0b; font-weight: bold;">${item.isPinned ? '📍 Unpin' : '📌 Pin to Top'}</button>
+                                        <button onclick="toggleNewCard('${item.id}')" style="color: var(--accent-green); font-weight: bold;">${item.isNew ? '⚪ Turn NEW Off' : '🟢 Turn NEW On'}</button>
+                                        <button onclick="moveOrderById('${item.id}', -1)">⬅️ Move Left</button>
+                                        <button onclick="moveOrderById('${item.id}', 1)">➡️ Move Right</button>
+                                        <button onclick="openMoveModal('${item.id}')" style="color: var(--accent-neon); font-weight: bold;">🔁 Move Section</button>
+                                        <button onclick="openSeasonsModal('${item.id}')" style="color: var(--accent-orange); font-weight: bold;">🔗 Manage Seasons</button>
+                                        <button onclick="editCard('${item.id}')">✏️ Edit Info</button>
+                                        <button onclick="deleteCard('${item.id}')">🗑️ Delete</button>
+                                        <button onclick="cloneCard('${item.id}')">📑 Clone</button>
+                                        <button onclick="shareCard('${item.id}')">🔗 Share</button>
+                                    </div>
+                                </div>`;
+                        }
+
+                        cardHTML += `<img src="${item.poster}" class="anime-poster" alt="Poster"><div class="anime-info"><h3 class="anime-title" title="${item.title}">${item.title}</h3>${seasonBadgeHTML}${noteHTML}${otherSeasonsHTML}`;
+                        let epOrDurLabel = (item.animeType === 'movie' || (item.animeType === 'ova' && item.ovaType === 'duration')) ? 'Duration' : 'Episodes';
+
+                        if (item.category === 'download') {
+                            let pCount = item.downloadParts && item.downloadParts.length > 0 ? item.downloadParts.length : (item.downloadPartCount !== undefined ? item.downloadPartCount : 0);
+                            let epDisplay = item.totalEp ? formatEpText(item.totalEp, item.animeType, item.ovaType) : (pCount === 0 ? 'Single File' : pCount + ' Parts');
+                            cardHTML += `<div class="anime-meta">${epOrDurLabel}: ${epDisplay}<br>Qual: ${item.quality || 'N/A'}<br>Size: ${item.size || 'N/A'}</div><div class="btn-container">`;
+                            
+                            if (pCount === 0) {
+                                if (item.filepress) cardHTML += `<a href="${item.filepress}" class="link-btn filepress" target="_blank">FilePress</a>`;
+                                if (item.appdrive) cardHTML += `<a href="${item.appdrive}" class="link-btn appdrive" target="_blank">AppDrive</a>`;
+                                if (item.hubcloud) cardHTML += `<a href="${item.hubcloud}" class="link-btn hubcloud" target="_blank">HubCloud</a>`;
+                                if (item.gdflix) cardHTML += `<a href="${item.gdflix}" class="link-btn gdflix" target="_blank">GDflix</a>`;
+                                if (item.link) cardHTML += `<a href="${item.link}" class="link-btn customlink" target="_blank">Direct Link</a>`;
+                            } else {
+                                let parts = item.downloadParts && item.downloadParts.length > 0 ? item.downloadParts : [{ partTitle: 'Part 1', filepress: item.filepress, appdrive: item.appdrive, hubcloud: item.hubcloud, gdflix: item.gdflix, link: item.link }];
+                                parts.forEach((p, idx) => {
+                                    let pName = p.partTitle || `Part ${idx + 1}`;
+                                    if (p.filepress) cardHTML += `<a href="${p.filepress}" class="link-btn filepress" target="_blank">Filepress ${pName}</a>`;
+                                    if (p.appdrive) cardHTML += `<a href="${p.appdrive}" class="link-btn appdrive" target="_blank">Appdrive ${pName}</a>`;
+                                    if (p.hubcloud) cardHTML += `<a href="${p.hubcloud}" class="link-btn hubcloud" target="_blank">Hubcloud ${pName}</a>`;
+                                    if (p.gdflix) cardHTML += `<a href="${p.gdflix}" class="link-btn gdflix" target="_blank">Gdflix ${pName}</a>`;
+                                    if (p.link) cardHTML += `<a href="${p.link}" class="link-btn customlink" target="_blank">Link ${pName}</a>`;
+                                });
+                            }
+                            cardHTML += `</div>`;
+                        } else if (item.category === 'downloaded') {
+                            cardHTML += `<div class="anime-meta" style="color: var(--accent-green); font-weight: bold;">💾 ${item.usbDrive}</div><div class="anime-meta">${epOrDurLabel}: ${formatEpText(item.episodes, item.animeType, item.ovaType)}<br>Qual: ${item.quality || 'N/A'}</div>`;
+                        } else if (item.category === 'ongoing') {
+                            cardHTML += `<div class="anime-meta">Status: ${item.episodes ? formatEpText(item.episodes, item.animeType, item.ovaType) : 'Ongoing'}</div><a href="${item.link || '#'}" class="ongoing-btn" target="_blank">Ongoing Link</a>`;
+                        } else if (item.category === 'watching') {
+                            let totalNum = parseInt(item.totalEp) || 0; let watchedNum = parseInt(item.watchedEp) || 0; let leftEp = Math.max(0, totalNum - watchedNum);
+                            cardHTML += `<div class="anime-meta">Total: ${totalNum} Ep | Watched: ${watchedNum}<br>Remaining: <span style="color: var(--accent-orange); font-weight: bold;">${leftEp} Left</span><br>Last Watched: ${item.lastWatched || 'N/A'}</div>`;
+                        } else if (item.category === 'completed') {
+                            cardHTML += `<div class="anime-meta">Total Ep: ${item.totalEp || 'N/A'}<br>Rating: ${item.rating || 'N/A'} ⭐<br>Year: ${item.watchYear || 'N/A'}<br>Month: ${item.watchMonth || 'N/A'}</div>`;
+                        }
+
+                        cardHTML += `</div></div>`;
+                        sectionHTML += cardHTML;
+                    });
+                    sectionHTML += `</div></div>`;
+                    container.innerHTML += sectionHTML;
                 });
-                sectionHTML += `</div></div>`;
-                container.innerHTML += sectionHTML;
             }
         });
-
-        if (totalPages > 1) {
-            let paginationHTML = `<div class="pagination-bar">`;
-            for (let i = 1; i <= totalPages; i++) {
-                let activeClass = i === currentPage ? 'active' : '';
-                paginationHTML += `<button class="page-btn ${activeClass}" onclick="changePage(${i})">${i}</button>`;
-            }
-            paginationHTML += `</div>`;
-            paginationContainer.innerHTML = paginationHTML;
-        }
     }
 </script>
 </body>
